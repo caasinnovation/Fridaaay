@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Fridaaay — Family Office Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#f5f3ee; --panel:#ffffff; --ink:#16211f; --muted:#6b756f; --line:#e8e4db;
@@ -36,6 +37,7 @@
   .auth .switch a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none}
   .auth .err{background:#fdeaec;color:var(--neg);font-size:13px;padding:10px 12px;border-radius:9px;margin-bottom:14px;display:none}
   .auth .err.show{display:block}
+  .auth .err.ok{background:var(--accent-soft);color:#0a6b64}
   .auth .demo{width:100%;padding:11px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:10px}
   .auth .demo:hover{background:#f8fafc}
   .auth .sec{font-size:11.5px;color:#94a3b8;text-align:center;margin-top:18px;line-height:1.5}
@@ -156,12 +158,12 @@
     <div class="field"><label>Password</label><input id="auPass" type="password" placeholder="••••••••" autocomplete="current-password" /></div>
 
     <button class="btn-primary" id="authSubmit">Sign in</button>
-    <button class="demo" id="demoBtn">Explore the demo workspace →</button>
+    <div style="text-align:center;margin-top:13px"><a id="forgotLink" style="font-size:13px;color:var(--accent);cursor:pointer;font-weight:600">Forgot your password?</a></div>
 
     <div class="switch" id="authSwitch">
       Don't have an account? <a id="toSignup">Create one</a>
     </div>
-    <div class="sec">🔒 Data is kept on this computer's <b>local server</b> (not the browser) and <b>encrypted with your password</b>.<br>Auto-locks after inactivity · sign-in required every time you open it.</div>
+    <div class="sec">🔒 Secured by Supabase · login required every visit · auto-locks when idle.<br>Forgot your password? Use the link above to get a reset email.</div>
   </div>
 </div>
 
@@ -234,18 +236,13 @@
    DATABASE LAYER  (localStorage-backed; ports cleanly to Postgres later)
    Tables: users, sessions, and per-user db_<userId> {entities,accounts,transactions}
    ===================================================================== */
-/* All data lives on the LOCAL SERVER (SQLite file on this machine), reached over this API.
-   Nothing is stored in the browser. The auth TOKEN is kept in memory only, so refreshing
-   or closing the tab requires signing in again — good for shared computers. */
-let TOKEN=null;
-async function api(method,path,body){
-  const r=await fetch(path,{ method,
-    headers:{ "Content-Type":"application/json", ...(TOKEN?{Authorization:"Bearer "+TOKEN}:{}) },
-    body: body!==undefined ? JSON.stringify(body) : undefined });
-  let j={}; try{ j=await r.json(); }catch(e){}
-  if(!r.ok) throw new Error(j.error || ("Request failed ("+r.status+")"));
-  return j;
-}
+/* ===== Cloud backend: Supabase (Postgres database + auth + email password reset) =====
+   Data lives in your Supabase project, not in this browser. Login is required every visit
+   (persistSession:false) — good for shared computers — plus an idle auto-lock. */
+const SUPABASE_URL="https://yblhkvxyhbnnccyagfuq.supabase.co";
+const SUPABASE_KEY="sb_publishable_4LwWQtA3axWd9vfV83vJ_A_TnNYMSTd";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:true}});
+let UID=null;   // current user's Supabase id
 
 /* ---- Encryption: the local database is encrypted at rest with the user's password.
    Self-contained (SHA-256 + keystream cipher) so it works even on file:// — no
@@ -365,8 +362,9 @@ let state={ view:"overview", entity:"all", range:12, txnType:"in" };
    ===================================================================== */
 let authMode="login";
 const $=id=>document.getElementById(id);
-function showErr(m){ const e=$("authErr"); e.textContent=m; e.classList.add("show"); }
-function clearErr(){ $("authErr").classList.remove("show"); }
+function showErr(m){ const e=$("authErr"); e.textContent=m; e.classList.remove("ok"); e.classList.add("show"); }
+function showInfo(m){ const e=$("authErr"); e.textContent=m; e.classList.add("ok","show"); }
+function clearErr(){ $("authErr").classList.remove("show","ok"); }
 function setAuthMode(mode){
   authMode=mode; clearErr();
   const signup=mode==="signup";
@@ -394,27 +392,57 @@ function doAuth(){
   const name=$("suName").value.trim(), firm=$("suFirm").value.trim();
   if(signup){ if(!name) return showErr("Please enter your name."); if(!firm) return showErr("Please enter your family office / firm name."); }
   const btn=$("authSubmit"); btn.disabled=true; btn.textContent=signup?"Creating…":"Signing in…";
-  const req=signup ? api("POST","/api/signup",{email,name,firm,password:pass})
-                   : api("POST","/api/login",{email,password:pass});
-  req.then(afterAuth).catch(e=>showErr(e.message)).finally(()=>{ btn.disabled=false; setAuthMode(authMode); });
+  (async()=>{
+    try{
+      if(signup){
+        const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name,firm}}});
+        if(error) throw error;
+        if(!data.session){ showInfo("Account created — check your email to confirm, then sign in."); setAuthMode("login"); return; }
+      } else {
+        const {error}=await sb.auth.signInWithPassword({email,password:pass});
+        if(error) throw error;
+      }
+      await afterAuth();
+    }catch(e){ showErr(e.message||"Something went wrong."); }
+    finally{ btn.disabled=false; setAuthMode(authMode); }
+  })();
 }
-function demoLogin(){
-  const btn=$("demoBtn"); btn.disabled=true; btn.textContent="Loading…";
-  api("POST","/api/demo").then(afterAuth).catch(e=>showErr(e.message))
-    .finally(()=>{ btn.disabled=false; btn.textContent="Explore the demo workspace →"; });
-}
-async function afterAuth(res){
-  TOKEN=res.token; CURRENT=res.user;
+async function forgotPassword(){
+  clearErr();
+  const email=$("auEmail").value.trim().toLowerCase();
+  if(!validEmail(email)) return showErr("Type your email in the field above first, then click ‘Forgot your password?’.");
   try{
-    const d=await api("GET","/api/data");
-    if(d.workspace){ DB=d.workspace; }
-    else { DB=freshSeedData(); await api("PUT","/api/data",{workspace:DB}); }
-  }catch(e){ TOKEN=null; return showErr(e.message); }
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href.split("#")[0]});
+    if(error) throw error;
+    showInfo("Reset link sent to "+email+". Open it to choose a new password.");
+  }catch(e){ showErr(e.message); }
+}
+async function handleRecovery(){
+  const np=prompt("Set a new password (at least 6 characters):");
+  if(np===null) return;
+  if(np.length<6){ alert("Password is too short."); return; }
+  const {error}=await sb.auth.updateUser({password:np});
+  if(error){ showErr(error.message); return; }
+  showInfo("Password updated — loading your workspace…");
+  await afterAuth();
+}
+async function afterAuth(){
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){ showErr("Could not sign you in."); return; }
+  UID=user.id;
+  const md=user.user_metadata||{};
+  CURRENT={ name:md.name||user.email, firm:md.firm||"Family Office", email:user.email };
+  try{
+    const {data,error}=await sb.from("workspaces").select("data").eq("user_id",UID).maybeSingle();
+    if(error) throw error;
+    if(data && data.data && data.data.entities){ DB=data.data; }
+    else { DB=freshSeedData(); const {error:e2}=await sb.from("workspaces").upsert({user_id:UID,firm:CURRENT.firm,data:DB}); if(e2) throw e2; }
+  }catch(e){ showErr("Couldn’t load your data: "+e.message); return; }
   enterApp(); resetIdle();
 }
-function doLogout(){
-  if(TOKEN) api("POST","/api/logout").catch(()=>{});
-  TOKEN=null; CURRENT=null; DB=null; clearTimeout(idleTimer);
+async function doLogout(){
+  try{ await sb.auth.signOut(); }catch(e){}
+  UID=null; CURRENT=null; DB=null; clearTimeout(idleTimer);
   $("appRoot").classList.add("hidden");
   $("authScreen").classList.remove("hidden");
   $("auEmail").value=""; $("auPass").value="";
@@ -422,7 +450,7 @@ function doLogout(){
 }
 function logout(){ doLogout(); }
 /* shared-computer auto-lock: sign out after inactivity so reports aren't left on screen */
-function resetIdle(){ if(!TOKEN) return; clearTimeout(idleTimer); idleTimer=setTimeout(()=>{ doLogout(); showErr("Locked after 5 minutes of inactivity. Please sign in again."); }, IDLE_MS); }
+function resetIdle(){ if(!UID) return; clearTimeout(idleTimer); idleTimer=setTimeout(()=>{ doLogout(); showErr("Locked after 5 minutes of inactivity. Please sign in again."); }, IDLE_MS); }
 ["mousemove","keydown","click","scroll","touchstart"].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
 
 /* ========================================================================
@@ -454,8 +482,8 @@ const acc=id=>DB.accounts.find(a=>a.id===id);
 function entFilter(list){ return state.entity==="all"?list:list.filter(a=>a.entity===state.entity); }
 function allTxns(){ return DB.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)); }
 function saveDB(){
-  if(!TOKEN) return;
-  api("PUT","/api/data",{workspace:DB}).catch(()=>{ doLogout(); showErr("Session ended — please sign in again."); });
+  if(!UID) return;
+  sb.from("workspaces").upsert({user_id:UID,data:DB}).then(({error})=>{ if(error) console.warn("Save failed:",error.message); });
 }
 
 /* analytics derived from current balances */
@@ -657,7 +685,7 @@ function saveTxn(){
    ===================================================================== */
 $("authSubmit").addEventListener("click",doAuth);
 $("auPass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth()});
-$("demoBtn").addEventListener("click",demoLogin);
+$("forgotLink").addEventListener("click",forgotPassword);
 $("logoutBtn").addEventListener("click",logout);
 $("lockBtn").addEventListener("click",logout);
 $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.view)});
@@ -671,9 +699,13 @@ $("ttoggle").addEventListener("click",e=>{const b=e.target.closest("button");if(
 $("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal()});
 
 // boot: restore session if present
-(function boot(){
+(async function boot(){
   setAuthMode("login"); wireSwitch();
-  setTimeout(()=>$("auEmail").focus(),60);   // no email pre-fill — shared computer
+  sb.auth.onAuthStateChange((event)=>{ if(event==="PASSWORD_RECOVERY") handleRecovery(); });
+  const isRecovery = (window.location.hash+window.location.search).includes("type=recovery");
+  if(isRecovery) return;   // wait for the recovery flow to set a new password
+  try{ const {data:{session}}=await sb.auth.getSession(); if(session){ await afterAuth(); return; } }catch(e){}
+  setTimeout(()=>$("auEmail").focus(),60);
 })();
 </script>
 </body>
