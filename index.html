@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fridaaay — Family Office Dashboard</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --panel:#ffffff; --ink:#16211f; --muted:#6b756f; --line:#e8e4db;
+    --sidebar:#0c1f1e; --sidebar2:#143231; --accent:#0e8c84; --accent-soft:#e2f1ef;
+    --gold:#c2954a; --pos:#0e8c84; --neg:#c2554e; --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .app{display:flex;min-height:100vh}
+  .hidden{display:none !important}
+
+  /* ===== AUTH SCREEN ===== */
+  .auth{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(1200px 600px at 70% -10%,#15403c 0%,#0c1f1e 55%,#081514 100%)}
+  .auth-card{width:420px;max-width:100%;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.4);padding:34px 32px}
+  .auth-brand{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+  .auth-brand .mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0a6b64);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:19px}
+  .auth-brand h1{font-size:18px;margin:0;font-weight:680}
+  .auth-brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.4px}
+  .auth h2{font-size:21px;margin:0 0 4px}
+  .auth .lead{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .field input,.field select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;background:#fff}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .auth .btn-primary{width:100%;padding:12px;background:var(--accent);color:#fff;border:0;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+  .auth .btn-primary:hover{background:#0a6b64}
+  .auth .switch{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
+  .auth .switch a{color:var(--accent);font-weight:600;cursor:pointer;text-decoration:none}
+  .auth .err{background:#fdeaec;color:var(--neg);font-size:13px;padding:10px 12px;border-radius:9px;margin-bottom:14px;display:none}
+  .auth .err.show{display:block}
+  .auth .demo{width:100%;padding:11px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:10px}
+  .auth .demo:hover{background:#f8fafc}
+  .auth .sec{font-size:11.5px;color:#94a3b8;text-align:center;margin-top:18px;line-height:1.5}
+
+  /* Sidebar */
+  .sidebar{width:248px;flex:0 0 248px;background:linear-gradient(180deg,var(--sidebar),var(--sidebar2));color:#cdd6e6;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:11px;padding:6px 8px 22px}
+  .brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#0a6b64);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;box-shadow:0 4px 14px rgba(14,140,132,.4)}
+  .brand h1{font-size:16px;margin:0;color:#fff;letter-spacing:.2px;font-weight:600}
+  .brand small{display:block;color:#7c89a3;font-size:11px;font-weight:500;letter-spacing:.3px}
+  .nav{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+  .nav button{display:flex;align-items:center;gap:11px;background:none;border:0;color:#aab6cd;padding:10px 12px;border-radius:9px;font-size:14px;cursor:pointer;text-align:left;width:100%;font-family:inherit;transition:.15s}
+  .nav button:hover{background:rgba(255,255,255,.05);color:#fff}
+  .nav button.active{background:rgba(14,140,132,.16);color:#fff}
+  .nav button.active .ic{color:var(--accent)}
+  .nav .ic{width:18px;text-align:center;font-size:15px;opacity:.95}
+  .side-foot{margin-top:auto;padding:14px 10px 4px;border-top:1px solid rgba(255,255,255,.07)}
+  .user-row{display:flex;align-items:center;gap:10px}
+  .user-row .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0a6b64);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex:0 0 auto}
+  .user-row .nm{color:#fff;font-size:13px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-row .fm{color:#7c89a3;font-size:11px}
+  .logout{margin-top:12px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);color:#cdd6e6;padding:8px;border-radius:8px;font-family:inherit;font-size:12.5px;cursor:pointer}
+  .logout:hover{background:rgba(225,73,91,.16);border-color:rgba(225,73,91,.4);color:#fff}
+
+  /* Main */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:16px;padding:18px 30px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .topbar .title h2{margin:0;font-size:19px;font-weight:600}
+  .topbar .title p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  .spacer{flex:1}
+  .control{display:flex;align-items:center;gap:8px}
+  select,.btn{font-family:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 12px;cursor:pointer;outline:none}
+  select:focus{border-color:var(--accent)}
+  .seg{display:inline-flex;background:#eef1f4;border-radius:9px;padding:3px}
+  .seg button{border:0;background:none;font-family:inherit;font-size:12.5px;color:var(--muted);padding:6px 11px;border-radius:7px;cursor:pointer;font-weight:500}
+  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  .btn.primary:hover{background:#0a6b64}
+  .btn:hover{background:#f8fafc}
+
+  .content{padding:26px 30px 60px;max-width:1320px;width:100%}
+  .grid{display:grid;gap:18px}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px 20px}
+  .kpi .lbl{color:var(--muted);font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:7px}
+  .kpi .val{font-size:26px;font-weight:680;margin:9px 0 6px;letter-spacing:-.5px}
+  .chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
+  .chip.up{background:var(--accent-soft);color:var(--accent)}
+  .chip.down{background:#fdeaec;color:var(--neg)}
+  .kpi .dot{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+
+  .row2{grid-template-columns:1.7fr 1fr}
+  .row3{grid-template-columns:1fr 1fr}
+  .card h3{margin:0;font-size:15px;font-weight:600}
+  .card .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+
+  .legend{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+  .legend .lg{display:flex;align-items:center;gap:10px;font-size:13px}
+  .legend .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+  .legend .lg .nm{color:var(--ink)}
+  .legend .lg .pc{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+  .legend .lg .am{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;min-width:78px;text-align:right}
+
+  .cat{display:flex;flex-direction:column;gap:14px}
+  .cat .r .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+  .cat .r .top .am{font-weight:600;font-variant-numeric:tabular-nums}
+  .track{height:8px;background:#eef1f4;border-radius:6px;overflow:hidden}
+  .track > div{height:100%;border-radius:6px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;padding:0 10px 11px}
+  td{padding:12px 10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+  tr:hover td{background:#fafbfc}
+  .num{text-align:right}
+  .pos{color:var(--pos)}.neg{color:var(--neg)}
+  .pill{font-size:11.5px;padding:3px 9px;border-radius:20px;background:#eef1f4;color:#475569;font-weight:500;white-space:nowrap}
+  .inst{display:flex;align-items:center;gap:10px}
+  .inst .lg2{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex:0 0 auto}
+  .ent-tag{font-size:11px;color:var(--muted)}
+
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:16px;width:440px;max-width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal h3{margin:0 0 4px;font-size:18px}
+  .modal p.s{margin:0 0 18px;color:var(--muted);font-size:13px}
+  .ttoggle{display:flex;gap:8px}
+  .ttoggle button{flex:1;padding:9px;border:1px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted)}
+  .ttoggle button.act-in{border-color:var(--pos);color:var(--pos);background:var(--accent-soft)}
+  .ttoggle button.act-out{border-color:var(--neg);color:var(--neg);background:#fdeaec}
+  .modal-foot{display:flex;gap:10px;margin-top:8px}
+  .modal-foot .btn{flex:1;justify-content:center;text-align:center;padding:11px}
+
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:30px}
+  @media(max-width:1080px){.kpis{grid-template-columns:repeat(2,1fr)}.row2,.row3{grid-template-columns:1fr}}
+  @media(max-width:720px){.sidebar{display:none}.content{padding:18px}}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div class="auth" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="mark">F</div>
+      <div><h1>Fridaaay</h1><small>FAMILY OFFICE PLATFORM</small></div>
+    </div>
+    <h2 id="authTitle">Welcome back</h2>
+    <p class="lead" id="authLead">Sign in to your family office workspace.</p>
+    <div class="err" id="authErr"></div>
+
+    <!-- Sign up only fields -->
+    <div id="signupFields" class="hidden">
+      <div class="field"><label>Full name</label><input id="suName" placeholder="Jane Hartwell" autocomplete="name" /></div>
+      <div class="field"><label>Family office / firm</label><input id="suFirm" placeholder="Hartwell Family Office" autocomplete="organization" /></div>
+    </div>
+    <div class="field"><label>Email</label><input id="auEmail" type="email" placeholder="you@familyoffice.com" autocomplete="email" /></div>
+    <div class="field"><label>Password</label><input id="auPass" type="password" placeholder="••••••••" autocomplete="current-password" /></div>
+
+    <button class="btn-primary" id="authSubmit">Sign in</button>
+    <button class="demo" id="demoBtn">Explore the demo workspace →</button>
+
+    <div class="switch" id="authSwitch">
+      Don't have an account? <a id="toSignup">Create one</a>
+    </div>
+    <div class="sec">🔒 Data is kept on this computer's <b>local server</b> (not the browser) and <b>encrypted with your password</b>.<br>Auto-locks after inactivity · sign-in required every time you open it.</div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div class="app hidden" id="appRoot">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">F</div>
+      <div><h1>Fridaaay</h1><small>FAMILY OFFICE</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="overview" class="active"><span class="ic">◧</span> Overview</button>
+      <button data-view="entities"><span class="ic">⬡</span> Entities</button>
+      <button data-view="accounts"><span class="ic">▤</span> Accounts</button>
+      <button data-view="transactions"><span class="ic">⇄</span> Transactions</button>
+      <button data-view="reports"><span class="ic">◔</span> Reports</button>
+    </nav>
+    <div class="side-foot">
+      <div class="user-row">
+        <div class="av" id="userAv">U</div>
+        <div style="min-width:0"><div class="nm" id="userName">User</div><div class="fm" id="userFirm">Firm</div></div>
+      </div>
+      <button class="logout" id="lockBtn">🔒 Lock now</button>
+      <button class="logout" id="logoutBtn" style="margin-top:8px">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="title"><h2 id="pageTitle">Consolidated Overview</h2><p id="pageSub">All entities · as of today</p></div>
+      <div class="spacer"></div>
+      <div class="control">
+        <select id="entitySel"></select>
+        <div class="seg" id="rangeSeg">
+          <button data-r="3">3M</button>
+          <button data-r="6">6M</button>
+          <button data-r="12" class="active">12M</button>
+        </div>
+        <button class="btn primary" id="addBtn">+ Transaction</button>
+      </div>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<!-- ADD TXN MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>Record Transaction</h3>
+    <p class="s">Updates the account balance and consolidated totals.</p>
+    <div class="ttoggle" id="ttoggle">
+      <button data-t="in" class="act-in">Inflow</button>
+      <button data-t="out">Outflow</button>
+    </div>
+    <div style="height:13px"></div>
+    <div class="field"><label>Entity</label><select id="fEntity"></select></div>
+    <div class="field"><label>Account</label><select id="fAccount"></select></div>
+    <div class="field"><label>Description</label><input id="fDesc" placeholder="e.g. Q2 distribution" /></div>
+    <div class="field"><label>Category</label><select id="fCat"></select></div>
+    <div class="field"><label>Amount (USD)</label><input id="fAmt" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+    <div class="modal-foot">
+      <button class="btn" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========================================================================
+   DATABASE LAYER  (localStorage-backed; ports cleanly to Postgres later)
+   Tables: users, sessions, and per-user db_<userId> {entities,accounts,transactions}
+   ===================================================================== */
+/* All data lives on the LOCAL SERVER (SQLite file on this machine), reached over this API.
+   Nothing is stored in the browser. The auth TOKEN is kept in memory only, so refreshing
+   or closing the tab requires signing in again — good for shared computers. */
+let TOKEN=null;
+async function api(method,path,body){
+  const r=await fetch(path,{ method,
+    headers:{ "Content-Type":"application/json", ...(TOKEN?{Authorization:"Bearer "+TOKEN}:{}) },
+    body: body!==undefined ? JSON.stringify(body) : undefined });
+  let j={}; try{ j=await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(j.error || ("Request failed ("+r.status+")"));
+  return j;
+}
+
+/* ---- Encryption: the local database is encrypted at rest with the user's password.
+   Self-contained (SHA-256 + keystream cipher) so it works even on file:// — no
+   secure-context dependency. MVP-grade; a hosted backend would use a managed KMS. ---- */
+const KDF_ITER=20000;
+function sha256bytes(msg){
+  const K=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+  const H=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]);
+  const l=msg.length,bitLen=l*8,withOne=l+1,k=(((56-(withOne%64))%64)+64)%64,total=withOne+k+8;
+  const m=new Uint8Array(total); m.set(msg); m[l]=0x80;
+  const dv=new DataView(m.buffer);
+  dv.setUint32(total-4,bitLen>>>0,false); dv.setUint32(total-8,Math.floor(bitLen/0x100000000),false);
+  const w=new Uint32Array(64),rotr=(x,n)=>(x>>>n)|(x<<(32-n));
+  for(let off=0;off<total;off+=64){
+    for(let i=0;i<16;i++) w[i]=dv.getUint32(off+i*4,false);
+    for(let i=16;i<64;i++){ const s0=rotr(w[i-15],7)^rotr(w[i-15],18)^(w[i-15]>>>3),s1=rotr(w[i-2],17)^rotr(w[i-2],19)^(w[i-2]>>>10); w[i]=(w[i-16]+s0+w[i-7]+s1)|0; }
+    let a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(let i=0;i<64;i++){ const S1=rotr(e,6)^rotr(e,11)^rotr(e,25),ch=(e&f)^((~e)&g),t1=(h+S1+ch+K[i]+w[i])|0,S0=rotr(a,2)^rotr(a,13)^rotr(a,22),maj=(a&b)^(a&c)^(b&c),t2=(S0+maj)|0; h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0; }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  const out=new Uint8Array(32),odv=new DataView(out.buffer);
+  for(let i=0;i<8;i++) odv.setUint32(i*4,H[i]>>>0,false);
+  return out;
+}
+function deriveKey(password,saltHex){
+  const block=new TextEncoder().encode(saltHex+":"+password);
+  let key=sha256bytes(block);
+  for(let i=0;i<KDF_ITER;i++){ const buf=new Uint8Array(key.length+block.length); buf.set(key); buf.set(block,key.length); key=sha256bytes(buf); }
+  return key;
+}
+function xorCrypt(data,key,nonce){
+  const out=new Uint8Array(data.length),ctrBuf=new Uint8Array(key.length+12);
+  ctrBuf.set(key,0); ctrBuf.set(nonce.subarray(0,8),key.length);
+  const dv=new DataView(ctrBuf.buffer); let counter=0;
+  for(let i=0;i<data.length;i+=32){ dv.setUint32(key.length+8,counter++,false); const ks=sha256bytes(ctrBuf),end=Math.min(32,data.length-i); for(let j=0;j<end;j++) out[i+j]=data[i+j]^ks[j]; }
+  return out;
+}
+function bytesToB64(b){ let s=""; const c=0x8000; for(let i=0;i<b.length;i+=c) s+=String.fromCharCode.apply(null,b.subarray(i,i+c)); return btoa(s); }
+function b64ToBytes(s){ const bin=atob(s),out=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i); return out; }
+function encryptStr(str,key){
+  const pt=new TextEncoder().encode("FRDB1\n"+str),nonce=new Uint8Array(8);
+  if(crypto.getRandomValues) crypto.getRandomValues(nonce); else for(let i=0;i<8;i++) nonce[i]=(i*73+7)&255;
+  const ct=xorCrypt(pt,key,nonce),all=new Uint8Array(8+ct.length); all.set(nonce); all.set(ct,8);
+  return bytesToB64(all);
+}
+function decryptStr(b64,key){
+  try{ const all=b64ToBytes(b64),nonce=all.subarray(0,8),ct=all.subarray(8),pt=xorCrypt(ct,key,nonce),txt=new TextDecoder().decode(pt);
+    return txt.startsWith("FRDB1\n")?txt.slice(6):null; }catch(e){ return null; }
+}
+function makeSalt(){ const a=new Uint8Array(8); if(crypto.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<8;i++) a[i]=(i*40+3)&255; return [...a].map(b=>b.toString(16).padStart(2,"0")).join(""); }
+const uid=()=>"u_"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);
+
+/* ========================================================================
+   SEED TEMPLATE  (cloned into each new user's database on signup)
+   ===================================================================== */
+const CLASS_COLORS={ "Cash":"#6e91a8","Public Equities":"#0e8c84","Fixed Income":"#8a6a86","Real Estate":"#c26b4e","Private Equity":"#d9a441","Alternatives":"#b5546a","Liabilities":"#94a3b8" };
+const BANK={ "City National":"#1f3a5f","JPMorgan":"#5b3a29","Fidelity":"#0a8754","Blackstone":"#111827","Chase":"#1167b1","Silicon Valley Bank":"#c2410c","Goldman Sachs":"#0b5cab","Carlyle":"#374151","Morgan Stanley":"#1f6feb","Vanguard":"#7a1f2b","Greylock Capital":"#0f766e","Sequoia Alt":"#7c3aed","Estate Lender":"#475569","Commercial Bank":"#475569" };
+const CATEGORIES=["Investment Income","Business Revenue","Distributions","Investment Mgmt Fees","Property & Maintenance","Taxes","Philanthropy","Travel & Lifestyle","Professional Services","Insurance"];
+
+const SEED_ENTITIES=[
+  {id:"trust",   name:"Hartwell Family Trust", type:"Trust",        color:"#0e8c84"},
+  {id:"holdings",name:"Hartwell Holdings LLC",  type:"Operating Co.",color:"#3f6e84"},
+  {id:"aurora",  name:"Aurora Legacy Fund",     type:"Next-Gen Fund",color:"#d9a441"},
+];
+const SEED_ACCOUNTS=[
+  {id:"a1",entity:"trust",inst:"City National",name:"Operating Checking",type:"Checking",cls:"Cash",bal:1250000},
+  {id:"a2",entity:"trust",inst:"JPMorgan",name:"Private Reserve",type:"Savings",cls:"Cash",bal:3400000},
+  {id:"a3",entity:"trust",inst:"Fidelity",name:"Core Equity",type:"Brokerage",cls:"Public Equities",bal:12800000},
+  {id:"a4",entity:"trust",inst:"Fidelity",name:"Municipal Bonds",type:"Brokerage",cls:"Fixed Income",bal:6200000},
+  {id:"a5",entity:"trust",inst:"Blackstone",name:"Real Estate Fund X",type:"Fund",cls:"Real Estate",bal:8500000},
+  {id:"a6",entity:"trust",inst:"Estate Lender",name:"Estate Mortgage",type:"Loan",cls:"Liabilities",bal:-2100000},
+  {id:"b1",entity:"holdings",inst:"Chase",name:"Operating Account",type:"Checking",cls:"Cash",bal:850000},
+  {id:"b2",entity:"holdings",inst:"Silicon Valley Bank",name:"Capital Reserve",type:"Savings",cls:"Cash",bal:2000000},
+  {id:"b3",entity:"holdings",inst:"Goldman Sachs",name:"Managed Portfolio",type:"Managed",cls:"Public Equities",bal:5500000},
+  {id:"b4",entity:"holdings",inst:"Carlyle",name:"PE Fund VII",type:"Fund",cls:"Private Equity",bal:9200000},
+  {id:"b5",entity:"holdings",inst:"Commercial Bank",name:"Commercial Property",type:"Asset",cls:"Real Estate",bal:6800000},
+  {id:"b6",entity:"holdings",inst:"Commercial Bank",name:"Revolving Credit",type:"Loan",cls:"Liabilities",bal:-1500000},
+  {id:"c1",entity:"aurora",inst:"Morgan Stanley",name:"Growth Brokerage",type:"Brokerage",cls:"Public Equities",bal:4100000},
+  {id:"c2",entity:"aurora",inst:"Vanguard",name:"Index Portfolio",type:"Brokerage",cls:"Public Equities",bal:2300000},
+  {id:"c3",entity:"aurora",inst:"Chase",name:"Cash Reserve",type:"Savings",cls:"Cash",bal:600000},
+  {id:"c4",entity:"aurora",inst:"Greylock Capital",name:"Hedge Fund LP",type:"Fund",cls:"Alternatives",bal:3400000},
+  {id:"c5",entity:"aurora",inst:"Sequoia Alt",name:"Venture & Digital",type:"Fund",cls:"Alternatives",bal:1200000},
+];
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seedTransactions(){
+  const rnd=mulberry32(42);
+  const samples=[["Distributions","Quarterly fund distribution",1],["Investment Income","Dividend & interest income",1],["Business Revenue","Operating revenue",1],["Investment Mgmt Fees","Advisory management fee",-1],["Property & Maintenance","Estate maintenance",-1],["Philanthropy","Foundation grant",-1],["Taxes","Estimated tax payment",-1],["Travel & Lifestyle","Lifestyle expenses",-1],["Professional Services","Legal & accounting",-1]];
+  const out=[];
+  for(let i=0;i<14;i++){
+    const e=SEED_ENTITIES[Math.floor(rnd()*SEED_ENTITIES.length)];
+    const accs=SEED_ACCOUNTS.filter(a=>a.entity===e.id&&a.cls!=="Liabilities");
+    const acc=accs[Math.floor(rnd()*accs.length)];
+    const s=samples[Math.floor(rnd()*samples.length)];
+    const mag=Math.round((10000+rnd()*240000)/100)*100;
+    const d=new Date(); d.setDate(d.getDate()-Math.floor(rnd()*70));
+    out.push({id:"seed"+i,date:d.toISOString().slice(0,10),entity:e.id,account:acc.id,desc:s[1],cat:s[0],amt:s[2]*mag});
+  }
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function freshSeedData(){
+  return { entities:JSON.parse(JSON.stringify(SEED_ENTITIES)), accounts:JSON.parse(JSON.stringify(SEED_ACCOUNTS)), transactions:seedTransactions() };
+}
+
+/* ========================================================================
+   APP STATE
+   ===================================================================== */
+let DB=null;            // current user's workspace {entities,accounts,transactions} (in memory)
+let CURRENT=null;       // current user {name,firm,email}
+let idleTimer=null;     // shared-computer auto-lock timer
+const IDLE_MS=5*60*1000;
+let NW_SERIES={},CF={},SPEND={};
+let state={ view:"overview", entity:"all", range:12, txnType:"in" };
+
+/* ========================================================================
+   AUTH
+   ===================================================================== */
+let authMode="login";
+const $=id=>document.getElementById(id);
+function showErr(m){ const e=$("authErr"); e.textContent=m; e.classList.add("show"); }
+function clearErr(){ $("authErr").classList.remove("show"); }
+function setAuthMode(mode){
+  authMode=mode; clearErr();
+  const signup=mode==="signup";
+  $("signupFields").classList.toggle("hidden",!signup);
+  $("authTitle").textContent=signup?"Create your workspace":"Welcome back";
+  $("authLead").textContent=signup?"Set up your family office in under a minute.":"Sign in to your family office workspace.";
+  $("authSubmit").textContent=signup?"Create account":"Sign in";
+  $("authSwitch").innerHTML=signup?`Already have an account? <a id="toLogin">Sign in</a>`:`Don't have an account? <a id="toSignup">Create one</a>`;
+  wireSwitch();
+}
+function wireSwitch(){
+  const s=$("toSignup"),l=$("toLogin");
+  if(s)s.onclick=()=>setAuthMode("signup");
+  if(l)l.onclick=()=>setAuthMode("login");
+}
+function validEmail(e){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e); }
+
+function doAuth(){
+  clearErr();
+  const email=$("auEmail").value.trim().toLowerCase();
+  const pass=$("auPass").value;
+  if(!validEmail(email)) return showErr("Please enter a valid email address.");
+  if(pass.length<6) return showErr("Password must be at least 6 characters.");
+  const signup=authMode==="signup";
+  const name=$("suName").value.trim(), firm=$("suFirm").value.trim();
+  if(signup){ if(!name) return showErr("Please enter your name."); if(!firm) return showErr("Please enter your family office / firm name."); }
+  const btn=$("authSubmit"); btn.disabled=true; btn.textContent=signup?"Creating…":"Signing in…";
+  const req=signup ? api("POST","/api/signup",{email,name,firm,password:pass})
+                   : api("POST","/api/login",{email,password:pass});
+  req.then(afterAuth).catch(e=>showErr(e.message)).finally(()=>{ btn.disabled=false; setAuthMode(authMode); });
+}
+function demoLogin(){
+  const btn=$("demoBtn"); btn.disabled=true; btn.textContent="Loading…";
+  api("POST","/api/demo").then(afterAuth).catch(e=>showErr(e.message))
+    .finally(()=>{ btn.disabled=false; btn.textContent="Explore the demo workspace →"; });
+}
+async function afterAuth(res){
+  TOKEN=res.token; CURRENT=res.user;
+  try{
+    const d=await api("GET","/api/data");
+    if(d.workspace){ DB=d.workspace; }
+    else { DB=freshSeedData(); await api("PUT","/api/data",{workspace:DB}); }
+  }catch(e){ TOKEN=null; return showErr(e.message); }
+  enterApp(); resetIdle();
+}
+function doLogout(){
+  if(TOKEN) api("POST","/api/logout").catch(()=>{});
+  TOKEN=null; CURRENT=null; DB=null; clearTimeout(idleTimer);
+  $("appRoot").classList.add("hidden");
+  $("authScreen").classList.remove("hidden");
+  $("auEmail").value=""; $("auPass").value="";
+  setAuthMode("login");
+}
+function logout(){ doLogout(); }
+/* shared-computer auto-lock: sign out after inactivity so reports aren't left on screen */
+function resetIdle(){ if(!TOKEN) return; clearTimeout(idleTimer); idleTimer=setTimeout(()=>{ doLogout(); showErr("Locked after 5 minutes of inactivity. Please sign in again."); }, IDLE_MS); }
+["mousemove","keydown","click","scroll","touchstart"].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));
+
+/* ========================================================================
+   ENTER APP
+   ===================================================================== */
+function enterApp(){
+  $("authScreen").classList.add("hidden");
+  $("appRoot").classList.remove("hidden");
+  // user chip
+  $("userName").textContent=CURRENT.name;
+  $("userFirm").textContent=CURRENT.firm;
+  $("userAv").textContent=initials(CURRENT.name);
+  // entity selector
+  const es=$("entitySel");
+  es.innerHTML=`<option value="all">All Entities (Consolidated)</option>`+DB.entities.map(e=>`<option value="${e.id}">${e.name}</option>`).join("");
+  state={ view:"overview", entity:"all", range:12, txnType:"in" };
+  rebuildAnalytics(); render();
+}
+
+/* ========================================================================
+   HELPERS
+   ===================================================================== */
+const fmt=n=>{const neg=n<0;n=Math.abs(Math.round(n));return (neg?"-$":"$")+n.toLocaleString("en-US")};
+const fmtShort=n=>{const neg=n<0;n=Math.abs(n);let s;if(n>=1e9)s=(n/1e9).toFixed(2)+"B";else if(n>=1e6)s=(n/1e6).toFixed(2)+"M";else if(n>=1e3)s=(n/1e3).toFixed(0)+"K";else s=n.toFixed(0);return(neg?"-$":"$")+s};
+function initials(s){ return (s||"?").split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+const entName=id=>DB.entities.find(e=>e.id===id)?.name||id;
+const entColor=id=>DB.entities.find(e=>e.id===id)?.color||"#64748b";
+const acc=id=>DB.accounts.find(a=>a.id===id);
+function entFilter(list){ return state.entity==="all"?list:list.filter(a=>a.entity===state.entity); }
+function allTxns(){ return DB.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)); }
+function saveDB(){
+  if(!TOKEN) return;
+  api("PUT","/api/data",{workspace:DB}).catch(()=>{ doLogout(); showErr("Session ended — please sign in again."); });
+}
+
+/* analytics derived from current balances */
+function rebuildAnalytics(){
+  NW_SERIES={};CF={};SPEND={};
+  DB.entities.forEach((e,ei)=>{
+    const end=DB.accounts.filter(a=>a.entity===e.id).reduce((s,a)=>s+a.bal,0);
+    // net worth series
+    const rnd=mulberry32(1000+ei*7); const arr=[]; let v=end*0.86;
+    for(let i=0;i<12;i++){ const drift=(end-v)/(12-i)/(end||1); const noise=(rnd()-0.45)*0.03; v=v*(1+drift+noise); arr.push(Math.round(v)); }
+    arr[11]=end; NW_SERIES[e.id]=arr;
+    // cash flow
+    const rnd2=mulberry32(500+ei*13); const base=DB.accounts.filter(a=>a.entity===e.id).reduce((s,a)=>s+Math.max(a.bal,0),0);
+    const inc=[],exp=[]; for(let i=0;i<12;i++){ const iv=Math.round(base*(0.012+rnd2()*0.01)); inc.push(iv); exp.push(Math.round(iv*(0.55+rnd2()*0.35))); }
+    CF[e.id]={inc,exp};
+    // spend by category
+    const rnd3=mulberry32(900+ei*5); const cats=["Investment Mgmt Fees","Property & Maintenance","Taxes","Philanthropy","Travel & Lifestyle","Professional Services","Insurance"];
+    const totalExp=exp.reduce((s,v)=>s+v,0); let w=cats.map(()=>0.4+rnd3()); const ws=w.reduce((s,v)=>s+v,0);
+    SPEND[e.id]=cats.map((c,i)=>({cat:c,amt:Math.round(totalExp*w[i]/ws)})).sort((a,b)=>b.amt-a.amt);
+  });
+}
+function activeSeries(){
+  const ids=state.entity==="all"?DB.entities.map(e=>e.id):[state.entity];
+  let arr=new Array(12).fill(0); ids.forEach(id=>NW_SERIES[id].forEach((v,i)=>arr[i]+=v));
+  return arr.slice(12-state.range);
+}
+function activeCashflow(){
+  const ids=state.entity==="all"?DB.entities.map(e=>e.id):[state.entity];
+  let inc=new Array(12).fill(0),exp=new Array(12).fill(0);
+  ids.forEach(id=>{CF[id].inc.forEach((v,i)=>inc[i]+=v);CF[id].exp.forEach((v,i)=>exp[i]+=v)});
+  return {inc:inc.slice(12-state.range),exp:exp.slice(12-state.range)};
+}
+function activeSpend(){
+  const ids=state.entity==="all"?DB.entities.map(e=>e.id):[state.entity];
+  const map={}; ids.forEach(id=>SPEND[id].forEach(s=>map[s.cat]=(map[s.cat]||0)+s.amt));
+  return Object.entries(map).map(([cat,amt])=>({cat,amt})).sort((a,b)=>b.amt-a.amt);
+}
+
+/* ========================================================================
+   CHARTS
+   ===================================================================== */
+function donutChart(segments,size=180){
+  const total=segments.reduce((s,x)=>s+x.value,0)||1;
+  const cx=size/2,cy=size/2,r=size/2-6,inner=r*0.62; let ang=-Math.PI/2,paths="";
+  segments.forEach(seg=>{ const frac=seg.value/total,a2=ang+frac*Math.PI*2;
+    const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+    const xi2=cx+inner*Math.cos(a2),yi2=cy+inner*Math.sin(a2),xi1=cx+inner*Math.cos(ang),yi1=cy+inner*Math.sin(ang);
+    const large=frac>0.5?1:0;
+    paths+=`<path d="M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${xi2} ${yi2} A${inner} ${inner} 0 ${large} 0 ${xi1} ${yi1} Z" fill="${seg.color}"></path>`; ang=a2; });
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${paths}</svg>`;
+}
+function areaChart(data,w=640,h=210){
+  if(data.length<2)data=[data[0]||0,data[0]||0];
+  const pad={l:8,r:8,t:14,b:22},min=Math.min(...data),max=Math.max(...data),range=(max-min)||1;
+  const iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,X=i=>pad.l+(i/(data.length-1))*iw,Y=v=>pad.t+ih-((v-min)/range)*ih*0.86-ih*0.07;
+  let line=data.map((v,i)=>`${i?"L":"M"}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join(" ");
+  let area=line+` L${X(data.length-1)} ${pad.t+ih} L${X(0)} ${pad.t+ih} Z`;
+  const offset=12-state.range; let labels="";
+  data.forEach((v,i)=>{ if(data.length>8&&i%2)return; labels+=`<text x="${X(i)}" y="${h-6}" font-size="10.5" fill="#94a3b8" text-anchor="middle">${MONTHS[(offset+i)%12]}</text>`; });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">
+    <defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#0e8c84" stop-opacity="0.22"/><stop offset="100%" stop-color="#0e8c84" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#ag)"/><path d="${line}" fill="none" stroke="#0e8c84" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${X(data.length-1)}" cy="${Y(data[data.length-1])}" r="4.5" fill="#0e8c84" stroke="#fff" stroke-width="2"/>${labels}</svg>`;
+}
+function cashflowChart(inc,exp,w=640,h=210){
+  const pad={l:8,r:8,t:14,b:22},max=Math.max(...inc,...exp,1),iw=w-pad.l-pad.r,ih=h-pad.t-pad.b,n=inc.length,group=iw/n,bw=Math.min(group*0.32,16),offset=12-state.range;
+  let bars="",labels="";
+  for(let i=0;i<n;i++){ const gx=pad.l+i*group+group/2,h1=(inc[i]/max)*ih,h2=(exp[i]/max)*ih;
+    bars+=`<rect x="${gx-bw-2}" y="${pad.t+ih-h1}" width="${bw}" height="${h1}" rx="3" fill="#0e8c84"/>`;
+    bars+=`<rect x="${gx+2}" y="${pad.t+ih-h2}" width="${bw}" height="${h2}" rx="3" fill="#e4ded3"/>`;
+    if(!(n>8&&i%2))labels+=`<text x="${gx}" y="${h-6}" font-size="10.5" fill="#94a3b8" text-anchor="middle">${MONTHS[(offset+i)%12]}</text>`; }
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none">${bars}${labels}</svg>`;
+}
+
+/* ========================================================================
+   CARDS / VIEWS  (unchanged rendering, now reading from DB)
+   ===================================================================== */
+function kpiBlock(){
+  const accs=entFilter(DB.accounts);
+  const assets=accs.filter(a=>a.cls!=="Liabilities").reduce((s,a)=>s+a.bal,0);
+  const liab=accs.filter(a=>a.cls==="Liabilities").reduce((s,a)=>s+a.bal,0);
+  const nw=assets+liab; const series=activeSeries(); const prev=series[0]||nw,deltaPct=prev?((nw-prev)/prev*100):0;
+  const cf=activeCashflow(); const flow=cf.inc.reduce((s,v)=>s+v,0)-cf.exp.reduce((s,v)=>s+v,0);
+  const card=(lbl,val,sub,icon,bg,chip)=>`<div class="card kpi"><div style="display:flex;justify-content:space-between;align-items:flex-start"><span class="lbl">${lbl}</span><span class="dot" style="background:${bg}1a;color:${bg}">${icon}</span></div><div class="val">${val}</div>${chip||sub}</div>`;
+  const chip=`<span class="chip ${deltaPct>=0?'up':'down'}">${deltaPct>=0?'▲':'▼'} ${Math.abs(deltaPct).toFixed(1)}% · ${state.range}M</span>`;
+  return `<div class="grid kpis">
+    ${card("Net Worth",fmtShort(nw),"",'◈','#0e8c84',chip)}
+    ${card("Total Assets",fmtShort(assets),`<span class="chip up">${accs.filter(a=>a.cls!=='Liabilities').length} positions</span>`,'▣','#3f6e84')}
+    ${card("Liabilities",fmtShort(liab),`<span class="chip down">${accs.filter(a=>a.cls==='Liabilities').length} obligations</span>`,'▽','#b5546a')}
+    ${card("Net Cash Flow",fmtShort(flow),`<span class="chip ${flow>=0?'up':'down'}">${flow>=0?'Surplus':'Deficit'} · ${state.range}M</span>`,'⇅','#d9a441')}</div>`;
+}
+function allocationCard(){
+  const accs=entFilter(DB.accounts).filter(a=>a.cls!=="Liabilities"); const map={};
+  accs.forEach(a=>map[a.cls]=(map[a.cls]||0)+a.bal);
+  const segs=Object.entries(map).map(([k,v])=>({label:k,value:v,color:CLASS_COLORS[k]})).sort((a,b)=>b.value-a.value);
+  const total=segs.reduce((s,x)=>s+x.value,0)||1;
+  const legend=segs.map(s=>`<div class="lg"><span class="sw" style="background:${s.color}"></span><span class="nm">${s.label}</span><span class="pc">${(s.value/total*100).toFixed(0)}%</span><span class="am">${fmtShort(s.value)}</span></div>`).join("");
+  return `<div class="card"><div class="card-head"><div><h3>Asset Allocation</h3><div class="sub">By asset class</div></div></div>
+    <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap"><div style="position:relative;flex:0 0 auto">${donutChart(segs,178)}
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="font-size:11px;color:var(--muted)">Total Assets</div><div style="font-size:19px;font-weight:680">${fmtShort(total)}</div></div></div>
+      <div class="legend" style="flex:1;min-width:200px">${legend}</div></div></div>`;
+}
+function trendCard(){
+  const series=activeSeries(),change=series[series.length-1]-series[0];
+  return `<div class="card"><div class="card-head"><div><h3>Net Worth Trend</h3><div class="sub">${state.entity==="all"?"All entities":entName(state.entity)} · last ${state.range} months</div></div>
+    <div style="text-align:right"><div style="font-size:18px;font-weight:680">${fmtShort(series[series.length-1])}</div><div class="chip ${change>=0?'up':'down'}" style="margin-top:2px">${change>=0?'▲':'▼'} ${fmtShort(Math.abs(change))}</div></div></div>${areaChart(series)}</div>`;
+}
+function cashflowCard(){
+  const cf=activeCashflow(),inT=cf.inc.reduce((s,v)=>s+v,0),exT=cf.exp.reduce((s,v)=>s+v,0);
+  return `<div class="card"><div class="card-head"><div><h3>Cash Flow</h3><div class="sub">Inflows vs outflows</div></div>
+    <div style="display:flex;gap:16px;font-size:12px"><span><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#0e8c84;margin-right:5px"></span>In ${fmtShort(inT)}</span><span><span class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#e4ded3;margin-right:5px"></span>Out ${fmtShort(exT)}</span></div></div>${cashflowChart(cf.inc,cf.exp)}</div>`;
+}
+function spendCard(){
+  const spend=activeSpend(),max=Math.max(...spend.map(s=>s.amt),1),palette=["#0e8c84","#3f6e84","#d9a441","#8a6a86","#c26b4e","#b5546a","#6e91a8"];
+  const rows=spend.map((s,i)=>`<div class="r"><div class="top"><span>${s.cat}</span><span class="am">${fmtShort(s.amt)}</span></div><div class="track"><div style="width:${(s.amt/max*100).toFixed(1)}%;background:${palette[i%palette.length]}"></div></div></div>`).join("");
+  return `<div class="card"><div class="card-head"><div><h3>Spending by Category</h3><div class="sub">Trailing ${state.range} months</div></div></div><div class="cat">${rows}</div></div>`;
+}
+function entityBreakdownCard(){
+  const rows=DB.entities.map(e=>({e,nw:DB.accounts.filter(a=>a.entity===e.id).reduce((s,a)=>s+a.bal,0)}));
+  const totalNW=rows.reduce((s,r)=>s+r.nw,0)||1;
+  const body=rows.map(r=>`<div class="r"><div class="top"><span style="display:flex;align-items:center;gap:8px"><span class="sw" style="width:9px;height:9px;border-radius:2px;background:${r.e.color}"></span>${r.e.name} <span class="ent-tag">· ${r.e.type}</span></span><span class="am">${fmtShort(r.nw)}</span></div><div class="track"><div style="width:${(r.nw/totalNW*100).toFixed(1)}%;background:${r.e.color}"></div></div></div>`).join("");
+  return `<div class="card"><div class="card-head"><div><h3>Net Worth by Entity</h3><div class="sub">Consolidated breakdown</div></div></div><div class="cat">${body}</div></div>`;
+}
+function accountsTable(limit){
+  let accs=entFilter(DB.accounts).slice().sort((a,b)=>b.bal-a.bal); if(limit)accs=accs.slice(0,limit);
+  const rows=accs.map(a=>{ const bc=BANK[a.inst]||"#475569"; return `<tr>
+    <td><div class="inst"><div class="lg2" style="background:${bc}">${initials(a.inst)}</div><div><div style="font-weight:600">${a.name}</div><div class="ent-tag">${a.inst}</div></div></div></td>
+    <td><span class="ent-tag" style="display:flex;align-items:center;gap:6px"><span class="sw" style="width:8px;height:8px;border-radius:2px;background:${entColor(a.entity)}"></span>${entName(a.entity)}</span></td>
+    <td><span class="pill">${a.type}</span></td>
+    <td><span class="pill" style="background:${CLASS_COLORS[a.cls]}18;color:${CLASS_COLORS[a.cls]}">${a.cls}</span></td>
+    <td class="num ${a.bal<0?'neg':''}" style="font-weight:600">${fmt(a.bal)}</td></tr>`; }).join("");
+  return `<table><thead><tr><th>Account</th><th>Entity</th><th>Type</th><th>Class</th><th class="num">Balance</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function txnTable(limit){
+  let t=allTxns().filter(x=>state.entity==="all"||x.entity===state.entity); if(limit)t=t.slice(0,limit);
+  if(!t.length)return `<div class="empty">No transactions yet.</div>`;
+  const rows=t.map(x=>{ const a=acc(x.account); return `<tr>
+    <td style="color:var(--muted);white-space:nowrap">${x.date}</td>
+    <td><div style="font-weight:600">${x.desc}</div><div class="ent-tag">${a?a.name:"—"}</div></td>
+    <td><span class="ent-tag" style="display:flex;align-items:center;gap:6px"><span class="sw" style="width:8px;height:8px;border-radius:2px;background:${entColor(x.entity)}"></span>${entName(x.entity)}</span></td>
+    <td><span class="pill">${x.cat}</span></td>
+    <td class="num ${x.amt>=0?'pos':'neg'}" style="font-weight:600">${x.amt>=0?'+':''}${fmt(x.amt)}</td></tr>`; }).join("");
+  return `<table><thead><tr><th>Date</th><th>Description</th><th>Entity</th><th>Category</th><th class="num">Amount</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+const VIEWS={
+  overview:()=>`${kpiBlock()}<div style="height:18px"></div><div class="grid row2">${trendCard()}${allocationCard()}</div><div style="height:18px"></div><div class="grid row3">${cashflowCard()}${spendCard()}</div><div style="height:18px"></div>
+    <div class="card"><div class="card-head"><div><h3>Top Accounts</h3><div class="sub">Largest positions across ${state.entity==="all"?"all entities":entName(state.entity)}</div></div><button class="btn" onclick="go('accounts')">View all →</button></div>${accountsTable(6)}</div>`,
+  entities:()=>`${kpiBlock()}<div style="height:18px"></div><div class="grid row2">${entityBreakdownCard()}${allocationCard()}</div><div style="height:18px"></div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr)">${DB.entities.map(e=>{ const accs=DB.accounts.filter(a=>a.entity===e.id); const nw=accs.reduce((s,a)=>s+a.bal,0); const assets=accs.filter(a=>a.cls!=="Liabilities").reduce((s,a)=>s+a.bal,0);
+      return `<div class="card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div class="mark" style="width:34px;height:34px;border-radius:9px;background:${e.color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">${initials(e.name)}</div><div><div style="font-weight:600">${e.name}</div><div class="ent-tag">${e.type} · ${accs.length} accounts</div></div></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span class="ent-tag">Net Worth</span><b>${fmtShort(nw)}</b></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span class="ent-tag">Assets</span><b>${fmtShort(assets)}</b></div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span class="ent-tag">Liabilities</span><b class="neg">${fmtShort(nw-assets)}</b></div>
+        <button class="btn" style="width:100%;margin-top:12px;justify-content:center" onclick="selectEntity('${e.id}')">Open ${e.type} →</button></div>`; }).join("")}</div>`,
+  accounts:()=>`<div class="card"><div class="card-head"><div><h3>All Accounts</h3><div class="sub">${entFilter(DB.accounts).length} accounts · ${state.entity==="all"?"all entities":entName(state.entity)}</div></div><button class="btn" onclick="exportCSV('accounts')">Export CSV</button></div>${accountsTable()}</div>`,
+  transactions:()=>`<div class="card"><div class="card-head"><div><h3>Transactions</h3><div class="sub">${allTxns().filter(x=>state.entity==="all"||x.entity===state.entity).length} records</div></div><div style="display:flex;gap:8px"><button class="btn" onclick="exportCSV('txns')">Export CSV</button><button class="btn primary" onclick="openModal()">+ Transaction</button></div></div>${txnTable()}</div>`,
+  reports:()=>`${kpiBlock()}<div style="height:18px"></div><div class="grid row2">${trendCard()}${allocationCard()}</div><div style="height:18px"></div><div class="grid row3">${cashflowCard()}${spendCard()}</div><div style="height:18px"></div>
+    <div class="grid row2">${entityBreakdownCard()}<div class="card"><div class="card-head"><div><h3>Export &amp; Share</h3><div class="sub">Board-ready reporting</div></div></div>
+      <p style="color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 16px">Generate consolidated reporting packages across all entities and accounts. Export raw data now; scheduled PDF reports arrive with the hosted version.</p>
+      <button class="btn" style="width:100%;justify-content:center;margin-bottom:9px" onclick="exportCSV('accounts')">⬇ Export Accounts (CSV)</button>
+      <button class="btn" style="width:100%;justify-content:center;margin-bottom:9px" onclick="exportCSV('txns')">⬇ Export Transactions (CSV)</button>
+      <button class="btn" style="width:100%;justify-content:center" onclick="window.print()">🖨 Print / Save as PDF</button></div></div>`,
+};
+const TITLES={overview:["Consolidated Overview","Real-time view across all entities"],entities:["Entities","Per-family & per-entity breakdown"],accounts:["Accounts","Every account across the office"],transactions:["Transactions","Inflows & outflows ledger"],reports:["Reports & Insights","Board-ready consolidated reporting"]};
+
+function render(){
+  $("content").innerHTML=VIEWS[state.view]();
+  const t=TITLES[state.view],scope=state.entity==="all"?"All entities":entName(state.entity);
+  $("pageTitle").textContent=t[0]; $("pageSub").textContent=`${scope} · ${t[1]}`;
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===state.view));
+}
+function go(v){state.view=v;render()}
+function selectEntity(id){state.entity=id;$("entitySel").value=id;render()}
+
+/* export */
+function download(name,content){ const blob=new Blob([content],{type:"text/csv"}),url=URL.createObjectURL(blob),a=document.createElement("a"); a.href=url;a.download=name;a.click();URL.revokeObjectURL(url); }
+function exportCSV(kind){
+  if(kind==="accounts"){ const rows=[["Entity","Institution","Account","Type","Asset Class","Balance"]]; entFilter(DB.accounts).forEach(a=>rows.push([entName(a.entity),a.inst,a.name,a.type,a.cls,a.bal])); download("fridaaay-accounts.csv",rows.map(r=>r.map(c=>`"${c}"`).join(",")).join("\n")); }
+  else{ const rows=[["Date","Entity","Account","Description","Category","Amount"]]; allTxns().filter(x=>state.entity==="all"||x.entity===state.entity).forEach(x=>rows.push([x.date,entName(x.entity),acc(x.account)?.name||"",x.desc,x.cat,x.amt])); download("fridaaay-transactions.csv",rows.map(r=>r.map(c=>`"${c}"`).join(",")).join("\n")); }
+}
+
+/* modal */
+function fillAccountSelect(){ const eid=$("fEntity").value; $("fAccount").innerHTML=DB.accounts.filter(a=>a.entity===eid&&a.cls!=="Liabilities").map(a=>`<option value="${a.id}">${a.name} — ${a.inst}</option>`).join(""); }
+function openModal(){ $("overlay").classList.add("open"); $("fEntity").innerHTML=DB.entities.map(e=>`<option value="${e.id}">${e.name}</option>`).join(""); if(state.entity!=="all")$("fEntity").value=state.entity; fillAccountSelect(); $("fCat").innerHTML=CATEGORIES.map(c=>`<option>${c}</option>`).join(""); setTxnType("in"); }
+function closeModal(){ $("overlay").classList.remove("open"); $("fDesc").value=""; $("fAmt").value=""; }
+function setTxnType(t){ state.txnType=t; document.querySelectorAll("#ttoggle button").forEach(b=>{b.className=b.dataset.t===t?(t==="in"?"act-in":"act-out"):""}); $("fCat").value=t==="in"?"Investment Income":"Investment Mgmt Fees"; }
+function saveTxn(){
+  const eid=$("fEntity").value,accId=$("fAccount").value,desc=$("fDesc").value.trim()||"Transaction",cat=$("fCat").value;
+  let amt=parseFloat($("fAmt").value); if(!amt||amt<=0){alert("Enter a valid amount.");return} if(state.txnType==="out")amt=-amt;
+  const t={id:"u"+Date.now(),date:new Date().toISOString().slice(0,10),entity:eid,account:accId,desc,cat,amt};
+  DB.transactions.unshift(t);
+  const a=acc(accId); if(a)a.bal+=amt;          // balance is source of truth
+  saveDB(); rebuildAnalytics(); closeModal(); render();
+}
+
+/* ========================================================================
+   EVENTS + BOOT
+   ===================================================================== */
+$("authSubmit").addEventListener("click",doAuth);
+$("auPass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth()});
+$("demoBtn").addEventListener("click",demoLogin);
+$("logoutBtn").addEventListener("click",logout);
+$("lockBtn").addEventListener("click",logout);
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.view)});
+$("entitySel").addEventListener("change",e=>{state.entity=e.target.value;render()});
+$("rangeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.range=+b.dataset.r;document.querySelectorAll("#rangeSeg button").forEach(x=>x.classList.toggle("active",x===b));render()});
+$("addBtn").addEventListener("click",openModal);
+$("cancelBtn").addEventListener("click",closeModal);
+$("saveBtn").addEventListener("click",saveTxn);
+$("fEntity").addEventListener("change",fillAccountSelect);
+$("ttoggle").addEventListener("click",e=>{const b=e.target.closest("button");if(b)setTxnType(b.dataset.t)});
+$("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal()});
+
+// boot: restore session if present
+(function boot(){
+  setAuthMode("login"); wireSwitch();
+  setTimeout(()=>$("auEmail").focus(),60);   // no email pre-fill — shared computer
+})();
+</script>
+</body>
+</html>
