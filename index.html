@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fridaaay — Ownership</title>
+<title>Fridaay — Ownership</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -30,8 +30,8 @@
   .err{background:#fdeaec;color:var(--neg);font-size:13px;padding:9px 11px;border-radius:8px;margin-bottom:12px;display:none}.err.show{display:block}
   .switch{text-align:center;font-size:13px;color:var(--muted);margin-top:16px}.switch a{color:var(--accent);font-weight:600;cursor:pointer}
   /* shell */
-  .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(180deg,var(--sidebar),var(--sidebar2));color:#cdd6e6;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh}
-  .sidebar .brand h1{color:#fff}.nav{display:flex;flex-direction:column;gap:3px;margin-top:10px}
+  .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(180deg,var(--sidebar),var(--sidebar2));color:#cdd6e6;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;overflow:hidden}
+  .sidebar .brand h1{color:#fff}.nav{display:flex;flex-direction:column;gap:3px;margin-top:10px;flex:1;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}.nav::-webkit-scrollbar{display:none!important;width:0!important}
   .nav button{display:flex;align-items:center;gap:10px;background:none;border:0;color:#aab6cd;padding:10px 12px;border-radius:9px;font-size:14px;cursor:pointer;text-align:left;font-family:inherit}
   .nav button:hover{background:rgba(255,255,255,.05);color:#fff}.nav button.active{background:rgba(14,140,132,.18);color:#fff}
   .nav-section{color:#62718a;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;margin:16px 4px 4px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
@@ -79,7 +79,7 @@
 
 <div class="auth" id="authScreen">
   <div class="auth-card">
-    <div class="brand"><div class="mark">F</div><div><h1>Fridaaay</h1><small>OWNERSHIP</small></div></div>
+    <div class="brand"><div class="mark">F</div><div><h1>Fridaay</h1><small>OWNERSHIP</small></div></div>
     <h2 id="authTitle">Sign in</h2>
     <div class="err" id="authErr"></div>
     <div id="suFields" class="hidden">
@@ -90,15 +90,31 @@
     <div class="field"><label>Password</label><input id="pass" type="password" placeholder="••••••••"/></div>
     <button class="btn primary full" id="submit" style="margin-top:4px">Sign in</button>
     <div class="switch" id="switch">No account? <a id="toSignup">Create one</a></div>
+    <div style="text-align:center;margin-top:8px;font-size:13px;display:flex;justify-content:center;gap:16px">
+      <a id="toChangePw" style="color:var(--muted);cursor:pointer">Change password</a>
+      <a id="toForgotPw" style="color:var(--muted);cursor:pointer">Forgot password</a>
+    </div>
+    <div id="fpPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:8px">
+      <input id="fpEmail" type="email" placeholder="Your email address" style="padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;width:100%;box-sizing:border-box"/>
+      <button class="btn full" id="fpBtn" style="border:1px solid #b91c1c;color:#b91c1c;background:#fff">Send reset link</button>
+      <div id="fpMsg" style="font-size:12.5px;text-align:center"></div>
+    </div>
+    <div id="cpPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:8px">
+      <input id="cpNewL" type="password" placeholder="New password (min 8 chars)" style="padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;width:100%;box-sizing:border-box"/>
+      <input id="cpConL" type="password" placeholder="Confirm new password" style="padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px;width:100%;box-sizing:border-box"/>
+      <button class="btn primary full" id="cpBtnL">Change password</button>
+      <div id="cpMsgL" style="font-size:12.5px;text-align:center"></div>
+    </div>
   </div>
 </div>
 
 <div class="app hidden" id="appRoot">
   <aside class="sidebar">
-    <div class="brand"><div class="mark">F</div><div><h1>Fridaaay</h1><small>OWNERSHIP</small></div></div>
+    <div class="brand"><div class="mark">F</div><div><h1>Fridaay</h1><small>OWNERSHIP</small></div></div>
     <nav class="nav" id="nav">
       <button data-v="dashboard" class="active">▦ Dashboard</button>
-      <button data-v="insights">◔ Insights</button>
+      <button data-v="insights">◔ Statements</button>
+      <span id="bankNav"></span>
       <div class="nav-section">Operation</div>
       <div class="nav-group">Entity</div>
       <button data-v="individual" class="sub">• Individual</button>
@@ -106,6 +122,7 @@
       <button data-v="accounts">▤ Bank accounts</button>
       <div class="nav-section">Admin</div>
       <button data-v="timeline">≣ Document log</button>
+      <button data-v="settings">⚙ Settings</button>
     </nav>
     <div class="side-foot">
       <div class="nm" id="uName">User</div><div class="em" id="uEmail">—</div>
@@ -138,7 +155,8 @@ const $=id=>document.getElementById(id);
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():"id"+Date.now()+Math.random().toString(36).slice(2));
 const fmt=n=>{const neg=n<0;n=Math.abs(Math.round(n));return (neg?"-$":"$")+n.toLocaleString("en-US")};
 const esc=s=>(s==null?"":String(s)).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-let UID=null, USER=null, M=null, view="dashboard", mode="login", openCompany=null, formFile=null, formBR=null, coEdit=false, brEditMode=false, pendingCap=null;
+let UID=null, USER=null, M=null, view="dashboard", mode="login", openCompany=null, openAccount=null, acctEdit=false, acctAddOpen=false, formFile=null, formBR=null, coEdit=false, brEditMode=false, pendingCap=null, coTab="info";
+function canonBank(b){ const k=(b||"").toUpperCase().replace(/\s+/g,""); return {HSBCCAAS:"HSBC CaaS",HSBCCOIN:"HSBC COIN",HSBC:"HSBC",BOC:"BOC"}[k]||(b||"").trim(); }
 
 /* ---------- auth ---------- */
 function showErr(m){const e=$("authErr");e.textContent=m;e.classList.add("show");}
@@ -164,29 +182,54 @@ async function afterAuth(){
   const{data:{user}}=await sb.auth.getUser();if(!user)return showErr("Sign-in failed.");
   UID=user.id;USER={name:(user.user_metadata||{}).name||user.email,email:user.email};
   $("uName").textContent=USER.name;$("uEmail").textContent=USER.email;
-  await load();$("authScreen").classList.add("hidden");$("appRoot").classList.remove("hidden");render();
+  await load();$("authScreen").classList.add("hidden");$("appRoot").classList.remove("hidden");render();publishBanks();setTimeout(preloadAllBanks,500);
 }
 async function logout(){try{await sb.auth.signOut();}catch(e){}UID=null;M=null;$("appRoot").classList.add("hidden");$("authScreen").classList.remove("hidden");$("pass").value="";setMode("login");}
 
 /* ---------- data ---------- */
-function emptyModel(){return{people:[],companies:[],accounts:[]};}
+function emptyModel(){return{people:[],companies:[],accounts:[],payees:[],tx_annotations:{}};}
+const SEED_PAYEES=[
+  {nickname:"AMY HSBC PERSONAL",   beneficiary_name:"Amy Ip",                         account:"008-638132-833",  ccy:"HKD",bank:"HSBC (004)",                             category:"Director's Loan",        remark:"Amy Ip – personal account"},
+  {nickname:"ANNIE LEUNG AND CO",  beneficiary_name:"Annie Leung and Co",             account:"048-845416-001",  ccy:"HKD",bank:"HSBC (004)",                             category:"Professional Fees",      remark:"Annie Leung – accounting / secretarial"},
+  {nickname:"ARCON MALAYSIA",      beneficiary_name:"ACORN MARKETING AND RESEARCH",   account:"3593158427",      ccy:"USD",bank:"PUBLIC BANK BERHAD (PBBE MYKLXXX)",      category:"Vendors",                remark:"Arcon Malaysia – marketing & research"},
+  {nickname:"CAAS BOC CHECKING",   beneficiary_name:"CAASBOCCHECKING",                account:"61120221757",     ccy:"HKD",bank:"BANK OF CHINA (HONG KONG) LTD (012)",    category:"Transfer to BOC CaaS",   remark:"CaaS – BOC checking account"},
+  {nickname:"CECI YAM",            beneficiary_name:"YAM SHUK YIN",                   account:"203052022882",    ccy:"HKD",bank:"HANG SENG BANK LTD (024)",               category:"Administrative Expenses", remark:"Ceci Yam Shuk Yin"},
+  {nickname:"CHONG YAN SUEN",      beneficiary_name:"",                               account:"821-377785-833",  ccy:"HKD",bank:"HSBC (004)",                             category:"Administrative Expenses", remark:"Chong Yan Suen"},
+  {nickname:"CHOREV",              beneficiary_name:"CHOREV CONSULTING INTERNATIONAL",account:"363455916883",    ccy:"HKD",bank:"HANG SENG BANK LTD (024)",               category:"Professional Fees",      remark:"Chorev Consulting International"},
+  {nickname:"CHUNG WING SZE",      beneficiary_name:"",                               account:"469-578728-833",  ccy:"HKD",bank:"HSBC (004)",                             category:"Administrative Expenses", remark:"Chung Wing Sze (Dom)"},
+  {nickname:"DIGITAL FAITH LIMITED",beneficiary_name:"Digital Faith Limited",         account:"110-4-043045",   ccy:"HKD",bank:"HSBC (004)",                             category:"Professional Fees",      remark:"Digital Faith Ltd – Francis"},
+  {nickname:"HKDA MEMBERSHIP",     beneficiary_name:"",                               account:"640-032827-001",  ccy:"HKD",bank:"HSBC (004)",                             category:"Administrative Expenses", remark:"HKDA annual membership fee"},
+  {nickname:"JANE NGAI",           beneficiary_name:"NGAI JANE YUET CHING",           account:"36886036631",     ccy:"HKD",bank:"STANDARD CHARTERED BK (HK) LTD (003)",  category:"Administrative Expenses", remark:"Jane Ngai"},
+  {nickname:"JEFF LEE CONTRACTOR", beneficiary_name:"LEE CHI HANG",                   account:"25039049221418",  ccy:"HKD",bank:"CITIBANK (HONG KONG) LTD (250)",        category:"Professional Fees",      remark:"Jeff Lee – contractor"},
+  {nickname:"PUI YEE MAN",         beneficiary_name:"",                               account:"042-430843-833",  ccy:"HKD",bank:"HSBC (004)",                             category:"Administrative Expenses", remark:"Pui Yee Man (Molly)"},
+  {nickname:"TRISTAN ZHOU",        beneficiary_name:"",                               account:"108-200601-833",  ccy:"HKD",bank:"HSBC (004)",                             category:"Administrative Expenses", remark:"Tristan Zhou"},
+  {nickname:"TWENTY20 LIMITED",    beneficiary_name:"TWENTY20 LIMITED",               account:"64700604644",     ccy:"HKD",bank:"CMB WING LUNG BANK LIMITED (020)",       category:"Vendors",                remark:"Twenty20 Limited"},
+];
 async function load(){
   const{data}=await sb.from("workspaces").select("data").eq("user_id",UID).maybeSingle();
   const d=(data&&data.data)||{};
   M=(d.ownership&&Array.isArray(d.ownership.people))?d.ownership:emptyModel();
-  if(!M.people)M.people=[];if(!M.companies)M.companies=[];if(!M.accounts)M.accounts=[];
+  if(!M.people)M.people=[];if(!M.companies)M.companies=[];if(!M.accounts)M.accounts=[];if(!M.payees)M.payees=[];if(!M.tx_annotations)M.tx_annotations={};
+  if(M.payees.length===0){M.payees=SEED_PAYEES.map(p=>({...p,id:uid()}));await save();}
+  else{let dirty=false;SEED_PAYEES.forEach(s=>{const e=M.payees.find(p=>p.nickname===s.nickname);if(e&&(e.category!==s.category||e.remark!==s.remark)){e.category=s.category;e.remark=s.remark;dirty=true;}});if(dirty)await save();}
 }
 async function save(){
   if(!UID)return;
   const{data}=await sb.from("workspaces").select("data").eq("user_id",UID).maybeSingle();
   const d=(data&&data.data)||{};d.ownership=M;
   await sb.from("workspaces").upsert({user_id:UID,data:d});
+  publishBanks();
+}
+async function publishBanks(){
+  try{
+    const accts=((M&&M.accounts)||[]).map(a=>({bank:(a.institution||"").trim(),account:(a.number||"").trim(),type:a.type||"individual"})).filter(a=>a.bank);
+  }catch(e){}
 }
 /* ---------- document hub (Supabase Storage) — per entity: person OR company ---------- */
 const entityRec=(kind,id)=>kind==="person"?person(id):kind==="account"?M.accounts.find(a=>a.id===id):company(id);
 const DOC_TYPES=[["other","Document"],["br","Business Registration (BR)"],["incorp","Incorporation / NAR1"],["statement","Financial statement"],["agreement","Agreement"],["id","ID / passport"],["tax","Tax"]];
 const findDoc=(kind,id,path)=>{const r=entityRec(kind,id);return r?(r.documents||[]).find(d=>d.path===path):null;};
-async function uploadDocs(kind,ownerId,files){
+async function uploadDocs(kind,ownerId,files,docType){
   let n=0;
   for(const file of files){
     const safe=file.name.replace(/[^\w.\-]/g,"_");
@@ -194,10 +237,16 @@ async function uploadDocs(kind,ownerId,files){
     const{error}=await sb.storage.from("documents").upload(path,file,{upsert:false});
     if(error){alert("Upload failed for "+file.name+": "+error.message+"\n\n(If it mentions a bucket, run storage-setup.sql first.)");continue;}
     const rec=entityRec(kind,ownerId);if(!rec)continue;rec.documents=rec.documents||[];
-    rec.documents.push({name:file.name,nick:file.name,type:"other",path,size:file.size,at:new Date().toISOString().slice(0,10)});
+    rec.documents.push({name:file.name,nick:file.name,type:docType||"other",path,size:file.size,at:new Date().toISOString().slice(0,10)});
     n++;
   }
   if(n){await save();render();}
+}
+async function openPdf(bank, file){
+  const path = bank + "/" + file;
+  const {data, error} = await sb.storage.from('statements').createSignedUrl(path, 3600);
+  if(error){ alert("Could not open PDF: " + error.message); return; }
+  window.open(data.signedUrl, '_blank');
 }
 async function previewDoc(path){
   const{data,error}=await sb.storage.from("documents").createSignedUrl(path,120);
@@ -210,10 +259,27 @@ async function downloadDoc(path){
   const a=document.createElement("a"); a.href=data.signedUrl; a.download=""; document.body.appendChild(a); a.click(); a.remove();
 }
 async function deleteDoc(kind,ownerId,path){
-  const{error}=await sb.storage.from("documents").remove([path]);
-  if(error){alert("Delete failed: "+error.message);return;}
+  if(!confirm("Remove this document from the hub?")) return;
+  let warn="";
+  try{ const{error}=await sb.storage.from("documents").remove([path]); if(error) warn=error.message; }
+  catch(e){ warn=e.message||String(e); }
   const rec=entityRec(kind,ownerId);if(rec)rec.documents=(rec.documents||[]).filter(d=>d.path!==path);
   await save();render();
+  if(warn) console.warn("Document removed from hub; storage cleanup issue:",warn);
+}
+async function extractStatementDoc(kind,id,path){
+  const d=findDoc(kind,id,path); if(!d||d.extracted) return;
+  if(!/\.pdf$/i.test(d.name||"")){ alert("Only PDF statements can be auto-scanned."); return; }
+  let blob;
+  try{ const{data,error}=await sb.storage.from("documents").createSignedUrl(path,120); if(error) throw error; blob=await (await fetch(data.signedUrl)).blob(); }
+  catch(e){ alert('Couldn\'t read "'+d.name+'" to scan: '+(e.message||e)); return; }
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>res(String(r.result).split(",")[1]);r.readAsDataURL(blob);});
+  let j;
+  try{ const resp=await fetch("/api/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({filename:d.name,base64:b64})}); j=await resp.json(); if(!resp.ok) throw new Error(j.error||"scan failed"); }
+  catch(e){ alert('Auto-scan is only available in the local version.\n\nTo extract this statement, run the local server and use the Statement Extractor there.'); return; }
+  d.extracted=true; d.stmtDate=j.statement_date; d.stmtTxns=j.added_transactions; await save();
+  alert('✓ Scanned "'+d.name+'" — statement '+(j.statement_date||"?")+", "+(j.added_transactions||0)+" transactions added to the database.\nNow holding "+j.total_statements+" statements, "+j.total_transactions+" transactions.");
+  render();
 }
 async function setDocNick(kind,id,path,v){const d=findDoc(kind,id,path);if(d){d.nick=v;await save();}}
 async function setDocType(kind,id,path,v){const d=findDoc(kind,id,path);if(d){d.type=v;await save();render();}}
@@ -223,32 +289,59 @@ const brSort=(a,b)=>((b.year||b.at)||"").localeCompare((a.year||a.at)||"");
 function docHub(kind,id,excludeType){
   const rec=entityRec(kind,id); let list=(rec&&rec.documents)||[];
   if(excludeType) list=list.filter(d=>d.type!==excludeType);
-  const docs=list.slice().sort(brSort).map(d=>`<div style="border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px">
-     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-       <div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:13.5px">${esc(d.name)}</div><div class="sub" style="margin:0">${d.at}</div></div>
-       <button class="btn sm" title="Preview" aria-label="Preview" data-preview="${esc(d.path)}">👁</button>
-       <button class="btn sm" data-dl="${esc(d.path)}">Download</button>
-       <button class="del" data-deldoc="${kind}|${id}|${esc(d.path)}">Delete</button>
-     </div>
-     <input class="cell" data-docremark="${kind}|${id}|${esc(d.path)}" value="${esc(d.remark||'')}" placeholder="Remark…" style="width:100%;text-align:left;margin-top:8px"/>
-  </div>`).join("")||`<div class="sub" style="margin-bottom:10px">No documents yet.</div>`;
-  return `<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px"><div style="font-weight:700;font-size:15px;margin-bottom:8px">Document hub</div>${docs}
-    <div style="display:flex;gap:10px;align-items:center"><div class="dropzone" data-drop="${kind}|${id}" style="flex:1;margin-top:0;padding:14px">Drag &amp; drop files here</div><button class="btn" data-uploadbtn="${kind}|${id}" style="white-space:nowrap">Upload</button></div>
-    <input type="file" multiple data-docfile="${kind}|${id}" style="display:none"/></div>`;
+  const HUB_TABS=[["br","BR"],["employee_comp","Employee Compensation"],["tax","Tax"],["other","Others"]].filter(([t])=>t!==excludeType);
+  const hubKey=kind+"|"+id;
+  const safeKey=(kind+"_"+id).replace(/[^a-z0-9_]/gi,"_");
+  const defaultTab=(_dhActive[safeKey]&&HUB_TABS.some(([t])=>t===_dhActive[safeKey]))?_dhActive[safeKey]:(HUB_TABS.find(([t])=>list.some(d=>(d.type||"other")===t))||HUB_TABS[0])[0];
+  const typeOpts=HUB_TABS.map(([t,l])=>`<option value="${t}">${l}</option>`).join("");
+  const docRow=d=>`<div style="border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div style="flex:1;min-width:140px"><div style="font-weight:600;font-size:13.5px">${esc(d.name)}${d.extracted?` <span style="font-weight:600;font-size:10.5px;background:var(--accent-soft);color:#0a6b64;padding:2px 7px;border-radius:5px">✓ scanned${d.stmtTxns?" · "+d.stmtTxns+" txns":""}</span>`:""}</div><div class="sub" style="margin:0">${d.at}</div></div>
+    <select data-settype="${hubKey}|${esc(d.path)}" data-dhsafekey="${safeKey}" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit"><option value="" disabled ${!(d.type&&HUB_TABS.some(([t])=>t===d.type))?"selected":""}>Move to…</option>${HUB_TABS.map(([t,l])=>`<option value="${t}"${(d.type||"other")===t?" selected":""}>${l}</option>`).join("")}</select>
+    <button class="btn sm" data-preview="${esc(d.path)}">👁 Preview</button>
+    <button class="btn sm" data-dl="${esc(d.path)}">⬇ Download</button>
+    <button class="btn sm" data-deldoc="${hubKey}|${esc(d.path)}">Delete</button>
+  </div>`;
+  const panels=HUB_TABS.map(([type,label])=>{
+    const rows=list.filter(d=>(d.type||"other")===type).sort(brSort).map(docRow).join("");
+    return `<div id="dhp_${safeKey}_${type}" data-dhpanel="${safeKey}" style="display:${type===defaultTab?"":"none"}">${rows||`<div class="sub" style="padding:10px 0">No ${label} documents yet.</div>`}</div>`;
+  }).join("");
+  const tabBtns=HUB_TABS.map(([type,label])=>{
+    const cnt=list.filter(d=>(d.type||"other")===type).length;
+    const on=type===defaultTab;
+    return `<button data-dhbtn="${safeKey}" data-dhtype="${type}" onclick="dhTab('${safeKey}','${type}')" style="padding:10px 16px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${on?"var(--accent)":"transparent"};color:${on?"var(--accent)":"var(--muted)"};margin-bottom:-1px">${label}${cnt?` <span style="font-size:11px;opacity:.65">(${cnt})</span>`:""}</button>`;
+  }).join("");
+  return `<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+    <div style="font-weight:700;font-size:15px;margin-bottom:10px">Document hub</div>
+    <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:12px">${tabBtns}</div>
+    ${panels}
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+      <div class="dropzone" data-drop="${hubKey}" style="flex:1;margin-top:0;padding:14px">Drag &amp; drop files here</div>
+      <button class="btn" data-uploadbtn="${hubKey}" style="white-space:nowrap">Upload</button>
+    </div>
+    <input type="file" multiple data-docfile="${hubKey}" data-dhsafekey="${safeKey}" style="display:none"/>
+  </div>`;
 }
 function bindDocs(){
   document.querySelectorAll("[data-drop]").forEach(z=>{const key=z.dataset.drop,inp=document.querySelector('[data-docfile="'+key+'"]'),p=key.split("|");
+    if(!inp) return;
+    const getType=()=>_dhActive[inp.dataset.dhsafekey]||"other";
     z.onclick=()=>inp.click();
     z.ondragover=e=>{e.preventDefault();z.classList.add("drag");};
     z.ondragleave=()=>z.classList.remove("drag");
-    z.ondrop=async e=>{e.preventDefault();z.classList.remove("drag");if(e.dataTransfer.files.length)await uploadDocs(p[0],p[1],e.dataTransfer.files);};
-    inp.onchange=async()=>{if(inp.files.length)await uploadDocs(p[0],p[1],inp.files);};
+    z.ondrop=async e=>{e.preventDefault();z.classList.remove("drag");if(e.dataTransfer.files.length)await uploadDocs(p[0],p[1],e.dataTransfer.files,getType());};
+    inp.onchange=async()=>{if(inp.files.length)await uploadDocs(p[0],p[1],inp.files,getType());};
   });
-  document.querySelectorAll("[data-uploadbtn]").forEach(b=>{const inp=document.querySelector('[data-docfile="'+b.dataset.uploadbtn+'"]');b.onclick=()=>inp.click();});
+  document.querySelectorAll("[data-uploadbtn]").forEach(b=>{const inp=document.querySelector('[data-docfile="'+b.dataset.uploadbtn+'"]');if(inp)b.onclick=()=>inp.click();});
   document.querySelectorAll("[data-preview]").forEach(b=>b.onclick=()=>previewDoc(b.dataset.preview));
   document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>downloadDoc(b.dataset.dl));
   document.querySelectorAll("[data-deldoc]").forEach(b=>b.onclick=async()=>{const p=b.dataset.deldoc.split("|");await deleteDoc(p[0],p[1],p[2]);});
-  document.querySelectorAll("[data-docremark]").forEach(inp=>inp.onchange=async()=>{const p=inp.dataset.docremark.split("|");await setDocRemark(p[0],p[1],p[2],inp.value);});
+  document.querySelectorAll("[data-settype]").forEach(sel=>sel.onchange=async()=>{
+    const parts=sel.dataset.settype.split("|");
+    const kind=parts[0],id=parts[1],path=parts.slice(2).join("|"),newType=sel.value;
+    const sk=sel.dataset.dhsafekey;
+    await setDocType(kind,id,path,newType);
+    dhTab(sk,newType);
+  });
 }
 /* ---------- model helpers ---------- */
 const person=id=>M.people.find(p=>p.id===id);
@@ -281,16 +374,17 @@ const BR_FIELDS=[
 const TITLES={
   dashboard:["Dashboard","Look-through ownership across all accounts"],
   insights:["Insights","Where the wealth sits"],
+  settings:["Settings","Account settings"],
+  hsbcStmt:["HSBC","Your latest statement, easy to read"],
   timeline:["Document log","Every document added across the workspace"],
   individual:["Individuals","People who own accounts"],
   company:["Companies","Legal entities and their shareholders"],
   accounts:["Bank accounts","Accounts and how they're owned"]
 };
 function companyList(){
-  const create=`<div class="card"><h3>Add a company</h3><div class="sub">Add a company, then upload its Business Registration on the company page</div>
-    <div style="margin-top:10px"><button class="btn primary" id="createNew">+ Create new</button></div></div>`;
-  const rows=M.companies.map(c=>`<tr data-openco="${c.id}" style="cursor:pointer"><td>${esc(c.name)}</td><td style="font-weight:700;text-transform:uppercase">${esc(c.short||"—")}</td><td class="num" style="color:var(--muted)">›</td></tr>`).join("")||`<tr><td colspan="3" class="hint">No companies yet — create one above.</td></tr>`;
-  return create+`<div class="card"><h3>Companies</h3><div class="sub">${M.companies.length} ${M.companies.length===1?"company":"companies"} · click a row to open</div>
+  const rows=M.companies.map(c=>`<tr data-openco="${c.id}" style="cursor:pointer"><td>${esc(c.name)}</td><td style="font-weight:700;text-transform:uppercase">${esc(c.short||"—")}</td><td class="num" style="color:var(--muted)">›</td></tr>`).join("")||`<tr><td colspan="3" class="hint">No companies yet — create one.</td></tr>`;
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn primary" id="createNew">+ Create new</button></div>
+    <div class="card"><h3>Companies</h3><div class="sub">${M.companies.length} ${M.companies.length===1?"company":"companies"} · click a row to open</div>
     <table><thead><tr><th>Company name</th><th>Short name</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function companyDetail(id){
@@ -334,7 +428,426 @@ function companyDetail(id){
   }
   const brBox=`<div class="card"><h3>BR info</h3>${brTop}${sep}${brList}${sep}${capArea}</div>`;
   const docBox=`<div class="card" style="padding-top:8px">${docHub("company",c.id,"br")}</div>`;
-  return header+infoBox+brBox+shBox+docBox;
+  const tabBtnStyle=(key)=>`padding:11px 20px;font-size:13.5px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${coTab===key?"var(--accent)":"transparent"};color:${coTab===key?"var(--accent)":"var(--muted)"};margin-bottom:-1px`;
+  const tabBar=`<div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:16px"><button id="coTabBtn_info" onclick="coTabSwitch('info')" style="${tabBtnStyle('info')}">Company info</button><button id="coTabBtn_docs" onclick="coTabSwitch('docs')" style="${tabBtnStyle('docs')}">Document hub</button></div>`;
+  return header+tabBar+`<div id="coPanel_info" style="display:${coTab==='docs'?'none':''}">${infoBox}${brBox}${shBox}</div><div id="coPanel_docs" style="display:${coTab==='docs'?'':'none'}">${docBox}</div>`;
+}
+function accountDetail(id){
+  const a=M.accounts.find(x=>x.id===id); if(!a){openAccount=null;return VIEWS.accounts();}
+  const holders = a.type==="company"
+    ? `<div class="ownrow"><span>Company</span><b>${esc(company(a.companyId)?(company(a.companyId).short||company(a.companyId).name):"?")}</b></div>`
+    : ((a.holders||[]).map(h=>`<div class="ownrow"><span>${esc(person(h.personId)?person(h.personId).name:"?")}</span><b>${h.pct}%</b></div>`).join("")||`<div class="sub">No holder set.</div>`);
+  const kind = a.type==="company"?"Company":((a.holders||[]).length>1?"Joint":"Individual");
+  const ed=acctEdit;
+  const header=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><button class="btn sm" id="backAcct">‹ All accounts</button><div style="display:flex;gap:8px"><button class="btn sm" id="editAcct">${ed?"✓ Done":"✎ Edit"}</button><button class="btn sm" data-del-acct="${a.id}">Delete</button></div></div>`;
+  let info;
+  if(ed){
+    info=`<div class="card"><h3>Edit account</h3>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label class="lbl">Bank name</label><input id="eaBank" value="${esc(a.institution||'')}"/></div>
+        <div class="field"><label class="lbl">Account number</label><input id="eaNumber" value="${esc(a.number||'')}"/></div>
+        <div class="field"><label class="lbl">Held by</label><select id="eaType"><option value="individual" ${a.type!=="company"?"selected":""}>Individual</option><option value="company" ${a.type==="company"?"selected":""}>Company</option></select></div>
+      </div>
+      <div id="eaOwnerArea" style="margin-top:10px"></div></div>`;
+  } else {
+    info=`<div class="card"><h3>${esc(a.institution||"Account")}</h3><div class="sub" style="margin:2px 0 12px">${esc(a.number||"—")} &nbsp;·&nbsp; <span class="pill ${a.type}">${kind}</span></div>
+      <div style="font-weight:600;font-size:12.5px;color:var(--muted);margin-bottom:6px">${a.type==="company"?"Owned by":("Account holder"+((a.holders||[]).length>1?"s":""))}</div>${holders}</div>`;
+  }
+  const txCard=`<div class="card"><h3>Transactions</h3><div class="sub">From your local statement database, matched by account number</div><div id="acctReport"><div class="sub">Loading…</div></div></div>`;
+  const docBox=`<div class="card" style="padding-top:8px">${docHub("account",a.id)}</div>`;
+  const tabs = M.accounts.length>1 ? `<div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;border-bottom:1px solid var(--line)">${M.accounts.map(x=>`<button class="acctab" data-acctab="${x.id}" style="padding:9px 16px;font-size:13.5px;font-weight:600;border:none;background:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid ${x.id===id?'var(--accent)':'transparent'};color:${x.id===id?'var(--accent)':'var(--muted)'};margin-bottom:-1px">${esc(x.institution||'Account')}</button>`).join("")}</div>` : "";
+  return tabs+header+info+txCard+docBox;
+}
+function acctArea(pts,w=900,h=150){
+  if(pts.length<2) return "";
+  const vals=pts.map(p=>p.v),min=Math.min(...vals),max=Math.max(...vals),rng=(max-min)||1;
+  const X=i=>8+(i/(pts.length-1))*(w-16),Y=v=>h-18-((v-min)/rng)*(h-34);
+  const line=pts.map((p,i)=>`${i?"L":"M"}${X(i).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none"><defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#0e8c84" stop-opacity=".2"/><stop offset="100%" stop-color="#0e8c84" stop-opacity="0"/></linearGradient></defs><path d="${line} L${X(pts.length-1)} ${h-18} L${X(0)} ${h-18} Z" fill="url(#ag)"/><path d="${line}" fill="none" stroke="#0e8c84" stroke-width="2"/></svg>`;
+}
+async function loadAcctReport(a){
+  const el=document.getElementById("acctReport"); if(!el) return;
+  let db;
+  try{ db=await loadStatementsDB(); }
+  catch(e){ el.innerHTML='<div class="sub">Couldn\'t load from Supabase: '+esc(e.message||e)+'. Push data via <b>Admin → ☁ Cloud sync</b>.</div>'; return; }
+  const num=(a.number||"").replace(/\D/g,"");
+  const mine=(db.statements||[]).filter(s=>((s.meta&&s.meta.account)||"").replace(/\D/g,"")===num);
+  if(!mine.length){ el.innerHTML='<div class="sub">No statements found for '+esc(a.number||"this account")+' yet. Add them in the <a href="/cloud/statements.html" style="color:var(--accent)">Statement Extractor</a>.</div>'; return; }
+  const keys=new Set(mine.map(s=>(s.bank||"")+"|"+s.date));
+  const myBals=(db.balances||[]).filter(b=>keys.has((b.bank||"")+"|"+b.statement_date));
+  const myTxns=(db.transactions||[]).filter(t=>keys.has((t.bank||"")+"|"+t.statement_date));
+  myTxns.forEach((t,i)=>t._i=i);
+  const savings=myBals.filter(b=>b.section==="deposit"&&(b.account_name||"").replace(/\s/g,"")==="HKDSavings").sort((x,y)=>(x.statement_date||"").localeCompare(y.statement_date||""));
+  const latest=savings.length?savings[savings.length-1].hkd_equivalent:null;
+  const dates=mine.map(s=>s.date).filter(Boolean).sort();
+  const months=[...new Set(myTxns.map(t=>t.statement_date))].sort().reverse();
+  const th=(sk,label,cls)=>`<th data-sk="${sk}" class="${cls||''}" style="cursor:pointer;white-space:nowrap">${label}<span class="skar" data-for="${sk}"></span></th>`;
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px">
+      <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px"><div class="sub" style="margin:0">Statements</div><div style="font-size:20px;font-weight:680">${mine.length}</div></div>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px"><div class="sub" style="margin:0">Transactions</div><div style="font-size:20px;font-weight:680">${myTxns.length.toLocaleString()}</div></div>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px"><div class="sub" style="margin:0">Latest HKD Savings</div><div style="font-size:17px;font-weight:680">${fmt(latest)}</div></div>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px"><div class="sub" style="margin:0">Range</div><div style="font-size:12px;font-weight:600;margin-top:5px">${dates[0]||""}<br>→ ${dates[dates.length-1]||""}</div></div></div>
+    ${savings.length>1?`<div style="font-weight:600;font-size:12.5px;margin-bottom:4px">HKD Savings balance over time</div>${acctArea(savings.map(b=>({v:+b.hkd_equivalent||0})))}`:""}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 10px">
+      <select id="arSec" style="padding:11px 12px;border:1.5px solid #b4b2a9;border-radius:8px;background:#fff"><option value="">All sections</option><option value="hkd_savings">HKD Savings</option><option value="hkd_current">HKD Current</option><option value="fcy_savings">FCY Savings</option></select>
+      <select id="arMonth" style="padding:11px 12px;border:1.5px solid #b4b2a9;border-radius:8px;background:#fff"><option value="">All months</option>${months.map(m=>`<option value="${m}">${m}</option>`).join("")}</select>
+      <input id="arSearch" placeholder="Search details…" style="flex:1;min-width:140px;padding:11px 12px;border:1.5px solid #b4b2a9;border-radius:8px"/><span class="sub" id="arCount" style="margin:0"></span></div>
+    <div style="max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px"><table><thead><tr>${th("stmt","Stmt")}${th("section","Section")}${th("ccy","CCY")}${th("date","Date")}${th("details","Details")}${th("deposit","In","num")}${th("withdrawal","Out","num")}${th("balance","Balance","num")}</tr></thead><tbody id="arBody"></tbody></table></div>`;
+  let sortKey="stmt", sortDir=-1;
+  const textK=new Set(["section","ccy","date","details"]);
+  const keyVal=t=> sortKey==="stmt" ? (t.statement_date||"") : textK.has(sortKey) ? (t[sortKey]==null?"":String(t[sortKey]).toLowerCase()) : (+(t[sortKey])||0);
+  const draw=()=>{
+    const sec=$("arSec").value,mo=$("arMonth").value,q=($("arSearch").value||"").toLowerCase();
+    let rows=myTxns.filter(t=>(!sec||t.section===sec)&&(!mo||t.statement_date===mo)&&(!q||(t.details||"").toLowerCase().includes(q)));
+    rows.sort((a,b)=>{const va=keyVal(a),vb=keyVal(b);let c=va<vb?-1:va>vb?1:(a._i-b._i);return c*sortDir;});
+    $("arCount").textContent=rows.length.toLocaleString()+" rows";
+    document.querySelectorAll("#acctReport .skar").forEach(s=>s.textContent=s.dataset.for===sortKey?(sortDir<0?" ▼":" ▲"):"");
+    rows=rows.slice(0,500);
+    $("arBody").innerHTML=rows.map(t=>`<tr><td class="sub" style="margin:0;white-space:nowrap">${esc(t.statement_date)}</td><td style="font-size:11px;white-space:nowrap">${esc((t.section||"").replace("_"," "))}</td><td style="white-space:nowrap">${esc(t.ccy||"")}</td><td style="white-space:nowrap">${esc(t.date)}</td><td style="min-width:240px">${esc(t.details)}</td><td class="num" style="color:var(--accent);white-space:nowrap">${t.deposit?fmt(t.deposit):""}</td><td class="num" style="color:#c2554e;white-space:nowrap">${t.withdrawal?fmt(t.withdrawal):""}</td><td class="num" style="white-space:nowrap">${t.balance!=null?fmt(t.balance):""}</td></tr>`).join("")||'<tr><td colspan="8" class="sub" style="text-align:center;padding:18px">No matching transactions.</td></tr>';
+  };
+  document.querySelectorAll("#acctReport th[data-sk]").forEach(h=>h.onclick=()=>{const k=h.dataset.sk;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=textK.has(k)?1:-1;}draw();});
+  $("arSec").onchange=$("arMonth").onchange=draw; $("arSearch").oninput=draw; draw();
+}
+const _BANK_CACHE={};
+async function loadStatementsDB(bank){
+  if(bank && _BANK_CACHE[bank]) return _BANK_CACHE[bank];
+  if(!bank && _BANK_CACHE["__all__"]) return _BANK_CACHE["__all__"];
+  const t0=performance.now();
+  const num=v=>(v===null||v===undefined||v==="")?null:parseFloat(v);
+  let lines=[];
+  let from=0; const PAGE=1000;
+  while(true){
+    let q=sb.from("statement_lines").select("*").order("statement_date",{ascending:true}).order("id",{ascending:true}).range(from,from+PAGE-1);
+    if(bank) q=q.eq("bank",bank);
+    const{data,error}=await q;
+    if(error) throw new Error(error.message);
+    lines=lines.concat(data||[]);
+    if((data||[]).length<PAGE) break;
+    from+=PAGE;
+  }
+  const seen=new Set(),statements=[];
+  for(const l of lines){
+    const k=`${l.bank}|${l.account_number||""}|${l.statement_date}`;
+    if(!seen.has(k)){seen.add(k);statements.push({date:l.statement_date,bank:l.bank,file:l.source_file,meta:{account:l.account_number||"",holder:l.holder,bank:l.bank}});}
+  }
+  const balances=lines.filter(l=>l.row_type==="balance").map(l=>({statement_date:l.statement_date,bank:l.bank,section:l.section,account_name:l.details,account_number:l.account_number,ccy:l.ccy,credit_limit:num(l.credit_limit),balance:num(l.balance),hkd_equivalent:num(l.hkd_equivalent),drcr:l.drcr}));
+  const transactions=lines.filter(l=>l.row_type==="transaction").map(l=>({id:l.id,statement_date:l.statement_date,bank:l.bank,section:l.section,ccy:l.ccy,date:l.txn_date,txn_date:l.txn_date,details:l.details,deposit:num(l.deposit),withdrawal:num(l.withdrawal),balance:num(l.balance),drcr:l.drcr,category:l.category||"",remark:l.remark||""}));
+  const result={statements,balances,transactions};
+  _BANK_CACHE[bank||"__all__"]=result;
+  console.log(`[supabase${bank?" "+bank:""}] ${Math.round(performance.now()-t0)}ms — ${statements.length} stmts, ${transactions.length} txns`);
+  return result;
+}
+// Silently preload all banks in the background after login
+function preloadAllBanks(){
+  const banks=((M&&M.accounts)||[]).map(a=>canonBank(a.institution)).filter(Boolean);
+  const unique=[...new Set(banks)];
+  unique.forEach(b=>{ if(!_BANK_CACHE[b]) loadStatementsDB(b).catch(()=>{}); });
+}
+function deglue(s){ return (s||"").replace(/([a-z])([A-Z])/g,"$1 $2").replace(/([A-Z]+)([A-Z][a-z])/g,"$1 $2"); }
+function fmtStmtDate(d){
+  if(!d) return "";
+  const p=d.split("-").map(Number); const MO=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return p.length===3?`${p[2]} ${MO[p[1]-1]} ${p[0]}`:d;
+}
+function summaryHTML(db,date){
+  const dates=(db.statements||[]).map(s=>s.date).filter(Boolean).sort().reverse();
+  const bals=db.balances.filter(b=>b.statement_date===date);
+  const txns=db.transactions.filter(t=>t.statement_date===date);
+  const file=(db.statements.find(s=>s.date===date)||{}).file||(date?date+"_Statement.pdf":"");
+  const dep=bals.filter(b=>b.section==="deposit");
+  const byCcy={}; dep.forEach(b=>{const c=b.ccy||"?"; (byCcy[c]=byCcy[c]||{bal:0,hkd:0}); byCcy[c].bal+=(+b.balance||0); byCcy[c].hkd+=(+b.hkd_equivalent||0);});
+  const order=Object.keys(byCcy).sort((a,b)=> a==="HKD"?-1 : b==="HKD"?1 : byCcy[b].hkd-byCcy[a].hkd);
+  const cashTotal=Object.values(byCcy).reduce((t,v)=>t+v.hkd,0);
+  const invRows=bals.filter(b=>b.section==="investment");
+  const invTotal=invRows.reduce((t,b)=>t+(+b.hkd_equivalent||0),0);
+  const cfRows=bals.filter(b=>b.section==="credit_facility");
+  const credTotal=cfRows.reduce((t,b)=>t+(+b.hkd_equivalent||0),0);
+  const loanInt=txns.filter(t=>/LOAN\s*INTEREST/i.test(t.details||"")).reduce((t,x)=>t+(+x.withdrawal||0),0);
+  const navBtn=(id,label)=>`<button class="btn sm" id="${id}">${label}</button>`;
+  const head=`<div style="background:#fff;border-bottom:1px solid var(--line);padding:18px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div><div style="font-size:11px;letter-spacing:3px;color:var(--muted);font-weight:600">SUMMARY</div><div style="font-size:20px;font-weight:700;margin-top:3px">At a glance</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${navBtn('sumPrev','‹ Prev')}<span style="font-weight:700;font-size:14px;min-width:108px;text-align:center">${fmtStmtDate(date)}</span>${navBtn('sumNext','Next ›')}</div></div></div>`;
+  const tile=(label,val,dr,hi)=>`<div style="flex:1;min-width:135px;padding:14px 16px;border-right:1px solid var(--line)${hi?';background:var(--accent-soft)':''}">
+    <div class="sub" style="margin:0">${label}</div><div style="font-size:17px;font-weight:720;margin-top:5px;letter-spacing:-.3px;color:${dr?'#c2554e':(hi?'var(--accent)':'inherit')}">${fmt(val)}${dr?' DR':''}</div></div>`;
+  const kpis=`<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line)">${tile('Cash',cashTotal,false,true)}${tile('Investment',invTotal)}${tile('Insurance',credTotal,true)}${tile('Loan interest',loanInt)}</div>`;
+  const CCYNAME={HKD:"Hong Kong Dollar",USD:"US Dollar",CNY:"Renminbi",RMB:"Renminbi",AUD:"Australian Dollar",EUR:"Euro",CAD:"Canadian Dollar",GBP:"Pound Sterling",JPY:"Japanese Yen",NZD:"NZ Dollar",SGD:"Singapore Dollar"};
+  const ccyTag=c=>c?`<span style="font-weight:700;font-size:11px;letter-spacing:.3px;background:var(--accent-soft);color:#0a6b64;padding:2px 7px;border-radius:5px">${c}</span>`:'';
+  const thd=`<thead><tr><th>Item</th><th>CCY</th><th class="num">Balance (orig.)</th><th class="num">HKD equivalent</th></tr></thead>`;
+  const tRow=(label,ccy,orig,hkd,dr)=>`<tr><td>${label}</td><td>${ccyTag(ccy)}</td><td class="num" style="color:var(--muted)">${(orig!=null&&orig!=='')?fmt(orig):'—'}</td><td class="num"><b>${hkd!=null?fmt(hkd):''}${dr?' <span style="color:#c2554e">DR</span>':''}</b></td></tr>`;
+  const totRow=(label,val,dr)=>`<tr style="border-top:2px solid var(--line)"><td colspan="2" style="font-weight:700">${label}</td><td></td><td class="num" style="font-weight:720;font-size:14px;color:${dr?'#c2554e':'var(--accent)'}">${fmt(val)}${dr?' DR':''}</td></tr>`;
+  const section=(icon,title,note,body)=>`<div style="padding:16px 24px;border-top:1px solid var(--line)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><div style="font-weight:700;font-size:14px">${icon} ${title}</div>${note?`<div class="sub" style="margin:0">${note}</div>`:''}</div>
+    <table>${thd}<tbody>${body}</tbody></table></div>`;
+  const cashBody=order.map(c=>tRow(CCYNAME[c]||c, c, byCcy[c].bal, byCcy[c].hkd)).join('')+totRow('Cash total',cashTotal);
+  const invBody=(invRows.length?invRows.map(b=>tRow(deglue(b.account_name)||'Securities', b.ccy, b.balance, b.hkd_equivalent)).join(''):tRow('Investment','',null,0))+totRow('Investment total',invTotal);
+  const insRow=`<tr><td>Insurance policy</td><td>${ccyTag('HKD')}</td><td class="num" style="color:var(--muted)">—</td><td class="num" style="color:var(--muted)">— <span style="font-size:11px">(add value)</span></td></tr>`;
+  const credBody=insRow+cfRows.map(b=>tRow((deglue(b.account_name)||'Insurance Premium Financing')+' (loan)', b.ccy, b.balance, b.hkd_equivalent, true)).join('')+totRow('Insurance total',credTotal,true);
+  const loanBody=tRow('Loan interest charged this statement','HKD',null,loanInt);
+  // ---- month-on-month change vs the previous statement ----
+  const allDates=(db.statements||[]).map(s=>s.date).filter(Boolean).sort();
+  const idx=allDates.indexOf(date), prevDate=idx>0?allDates[idx-1]:null;
+  const totalsFor=d=>{const b=db.balances.filter(x=>x.statement_date===d),t=db.transactions.filter(x=>x.statement_date===d);
+    const S2=(arr,sec)=>arr.filter(x=>x.section===sec).reduce((a,x)=>a+(+x.hkd_equivalent||0),0);
+    return {cash:S2(b,'deposit'),inv:S2(b,'investment'),loan:S2(b,'credit_facility'),li:t.filter(x=>/LOAN\s*INTEREST/i.test(x.details||'')).reduce((a,x)=>a+(+x.withdrawal||0),0)};};
+  const curT={cash:cashTotal,inv:invTotal,loan:credTotal,li:loanInt}, prevT=prevDate?totalsFor(prevDate):null;
+  const dcell=(cur,prev,liab)=>{ if(prev==null) return '<span class="sub" style="margin:0">—</span>';
+    const d=cur-prev, good=liab?d<0:d>0, color=d===0?'var(--muted)':(good?'var(--accent)':'#c2554e'), arr=d===0?'•':(d>0?'▲':'▼');
+    const pctTxt=d===0?'':(prev?` (${Math.abs(d/prev*100).toFixed(1)}%)`:' (new)');
+    return `<span style="color:${color};font-weight:700">${arr} ${d>=0?'+':'−'}${fmt(Math.abs(d))}<span style="font-weight:500;font-size:11px;opacity:.85">${pctTxt}</span></span>`; };
+  const momRow=(label,cur,prev,liab)=>`<tr><td>${label}</td><td class="num">${fmt(cur)}${liab&&cur?' DR':''}</td><td class="num" style="color:var(--muted)">${prev!=null?fmt(prev)+(liab&&prev?' DR':''):'—'}</td><td class="num">${dcell(cur,prev,liab)}</td></tr>`;
+  const curNet=curT.cash+curT.inv-curT.loan, prevNet=prevT?prevT.cash+prevT.inv-prevT.loan:null;
+  const momBody=momRow('Cash',curT.cash,prevT?prevT.cash:null)+momRow('Investment',curT.inv,prevT?prevT.inv:null)
+    +momRow('Insurance financing (loan)',curT.loan,prevT?prevT.loan:null,true)+momRow('Loan interest',curT.li,prevT?prevT.li:null,true)
+    +`<tr style="border-top:2px solid var(--line)"><td style="font-weight:700">Net position</td><td class="num" style="font-weight:700">${fmt(curNet)}</td><td class="num" style="color:var(--muted)">${prevNet!=null?fmt(prevNet):'—'}</td><td class="num">${dcell(curNet,prevNet,false)}</td></tr>`;
+  const momSection=`<div style="padding:16px 24px;border-top:1px solid var(--line);background:#faf9f6">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><div style="font-weight:700;font-size:14px">📊 Change vs last statement</div><div class="sub" style="margin:0">${prevDate?'vs '+fmtStmtDate(prevDate):'first statement on record'}</div></div>
+    <table><thead><tr><th>Category</th><th class="num">This statement</th><th class="num">Last statement</th><th class="num">Change</th></tr></thead><tbody>${momBody}</tbody></table></div>`;
+  const card=`<div class="card" style="padding:0;overflow:hidden">${head}${kpis}${momSection}
+    ${section('💰','Cash','by currency',cashBody)}
+    ${section('📈','Investment',invRows.length+' holding'+(invRows.length===1?'':'s'),invBody)}
+    ${section('🛡️','Insurance','policy + financing',credBody)}
+    ${section('📉','Loan interest','this statement',loanBody)}</div>`;
+  return card;
+}
+function hsbcStatementHTML(db,date,bank,bankDates){
+  const dates=(db.statements||[]).map(s=>s.date).filter(Boolean).sort().reverse();
+  const _seen=new Set();
+  const bals=db.balances.filter(b=>b.statement_date===date && (!bank||!b.bank||canonBank(b.bank)===canonBank(bank)))
+    .filter(b=>{const k=[b.section,b.account_name,b.account_number,b.ccy,b.balance].join("|"); if(_seen.has(k))return false; _seen.add(k); return true;});
+  const txns=db.transactions.filter(t=>t.statement_date===date && (!bank||!t.bank||canonBank(t.bank)===canonBank(bank)));
+  const meta=(db.statements.find(s=>s.date===date)||{}).meta||{};
+  const G=s=>bals.filter(b=>b.section===s);
+  const S=arr=>arr.reduce((t,b)=>t+(+b.hkd_equivalent||0),0);
+  const dep=G("deposit"),inv=G("investment"),cf=G("credit_facility"),cc=G("credit_card");
+  const depT=S(dep),invT=S(inv),ccT=S(cc),cfT=S(cf),net=depT+invT-ccT-cfT;
+  const acct=meta.account||"";
+  const appAcct=M.accounts.find(a=>(a.number||"").replace(/\D/g,"")===acct.replace(/\D/g,""));
+  const holder=(appAcct&&(appAcct.holders||[]).length)?appAcct.holders.map(h=>person(h.personId)?person(h.personId).name:"").filter(Boolean).join(", "):((meta.holder||"").replace(/\s+/g," ").replace(/\s*Number\s*:.*$/i,"").trim());
+  const _cb=canonBank(bank);
+  const isBiz=(_cb==="HSBC CaaS"||_cb==="HSBC COIN");   // company tier is Business Direct, not Premier
+  const elite=meta.elite||(isBiz?"Business Direct":"Premier");
+  const file=(db.statements.find(s=>s.date===date)||{}).file||(date?date+"_Statement.pdf":"");
+  const isBOC=(bank||"").toUpperCase()==="BOC";
+  const brandLabel=isBOC?"BANK OF CHINA (HONG KONG)":esc(bank||"HSBC");
+  const brandLS=isBOC?"2px":"4px";
+  const tier=isBOC?"Private Wealth 私人財富":esc(elite);
+  const grad=isBOC?"linear-gradient(135deg,#c8102e,#8a0b1c)":"linear-gradient(135deg,#c00,#7a0000)";
+  const _allDates=(bankDates&&bankDates.length?bankDates:(db.statements||[]).map(s=>s.date).filter(Boolean).sort()).slice().reverse();
+  const curYear=(date||"").slice(0,4);
+  const allYears=[...new Set(_allDates.map(d=>d.slice(0,4)).filter(Boolean))];
+  const yearOpts=allYears.map(y=>`<option value="${esc(y)}"${y===curYear?' selected':''}>${y}</option>`).join('');
+  const dateSel=(dark)=>`<select id="stmtDateSel" style="font-size:14px;font-weight:600;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit;${dark?'background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)':'background:var(--panel);color:var(--fg);border:1px solid var(--line)'}">${yearOpts}</select>`;
+  const _MO=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const curMoIdx=parseInt((date||"").slice(5,7)||"0")-1;
+  const yrDates=_allDates.filter(d=>d.startsWith(curYear));
+  const moMap={};yrDates.forEach(d=>{const m=parseInt(d.slice(5,7))-1;if(!(m in moMap))moMap[m]=d;});
+  const moTabs=_MO.map((lb,idx)=>{const d=moMap[idx];const on=idx===curMoIdx;const en=!!d;return`<button${en?` onclick="_stmtNav('${esc(d)}')"`:''} style="padding:9px 13px;font-size:13px;font-weight:${on?700:500};border:none;background:none;cursor:${en?'pointer':'default'};border-bottom:2px solid ${on?'var(--accent)':'transparent'};color:${on?'var(--accent)':en?'var(--fg)':'var(--muted)'};opacity:${en?1:0.4};margin-bottom:-1px">${lb}</button>`;}).join('');
+  const monthNav=`<div style="display:flex;border-bottom:1px solid var(--line);padding:0 8px">${moTabs}</div>`;
+  const _pdfOnclick="openPdf('"+bank.replace(/'/g,"\\'")+"','"+file.replace(/'/g,"\\'")+"')";
+  const pdfBtn=(dark)=>file?`<button class="btn sm" onclick="${_pdfOnclick}" style="${dark?'background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)':''}">📄 View original PDF</button>`:'';
+  const bocLogo=`<svg width="40" height="40" viewBox="0 0 40 40" style="flex:none"><circle cx="20" cy="20" r="16.5" fill="none" stroke="#c8102e" stroke-width="3"/><rect x="13.5" y="8.5" width="13" height="23" fill="none" stroke="#c8102e" stroke-width="3"/><line x1="20" y1="3" x2="20" y2="37" stroke="#c8102e" stroke-width="3"/></svg>`;
+  const head = isBOC
+    ? `<div style="background:#fff;border-bottom:1px solid var(--line);padding:18px 24px;border-radius:14px 14px 0 0">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">${bocLogo}<div><div style="color:#c8102e;font-weight:700;font-size:17px;letter-spacing:1px">中國銀行（香港）</div><div style="font-size:10.5px;letter-spacing:1.5px;color:#16211f;font-weight:600">BANK OF CHINA (HONG KONG)</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px">${dateSel(false)}</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px">
+          <div style="font-size:16px"><b>${esc(holder||"Account holder")}</b><br><span style="font-size:13px;color:var(--muted)">Private Wealth 私人財富 · Account ${esc(acct||"—")}</span></div>
+          </div></div>`
+    : `<div style="background:${grad};color:#fff;padding:20px 26px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <div><div style="font-size:12px;letter-spacing:1px;font-weight:700;opacity:.9">${tier}</div><div style="font-size:23px;font-weight:700;margin-top:3px">${brandLabel}</div></div>
+          <div style="display:flex;align-items:center;gap:10px">${dateSel(true)}</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px">
+          <div style="font-size:16px"><b>${esc(holder||"Account holder")}</b><br><span style="font-size:13px;opacity:.85">Account ${esc(acct||"—")}</span></div>
+          </div></div>`;
+  const ov=(label,val,dr,hi)=>`<div style="flex:1;min-width:128px;padding:14px 16px;border-right:1px solid var(--line)${hi?";background:var(--accent-soft)":""}"><div class="sub" style="margin:0">${label}</div><div style="font-size:${hi?20:18}px;font-weight:${hi?720:680};margin-top:4px;color:${hi?'var(--accent)':(dr?'#c2554e':'inherit')}">${fmt(val)}${dr?" DR":""}</div></div>`;
+  const overview=`<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line)">${ov("Deposits",depT)}${invT?ov("Investments",invT):""}${ccT?ov("Credit Cards",ccT,true):""}</div>`;
+  const balRow=b=>`<tr><td>${esc(deglue(b.account_name||"")||"—")}</td><td style="color:var(--muted)">${esc(b.account_number||"")}</td><td>${esc(b.ccy||"")}</td><td class="num">${fmt(b.balance||0)}${b.drcr==="DR"?" DR":""}</td><td class="num"><b>${fmt(b.hkd_equivalent||0)}</b></td></tr>`;
+  const balGroup=(title,arr,tot,dr)=>arr.length?`<div style="font-weight:700;font-size:13.5px;margin:16px 0 6px">${title}</div>
+    <table><thead><tr><th>Account</th><th>Number</th><th>CCY</th><th class="num">Balance</th><th class="num">HKD equiv.</th></tr></thead><tbody>${arr.map(balRow).join("")}
+    <tr style="border-top:2px solid var(--line)"><td colspan="4" style="font-weight:600">Total</td><td class="num" style="font-weight:720${dr?';color:#c2554e':''}">${fmt(tot)}${dr?" DR":""}</td></tr></tbody></table>`:"";
+  const portfolio=`<div style="padding:18px 24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="margin:0">Portfolio Summary</h3>${pdfBtn(false)}</div>
+    ${balGroup(isBOC?"Deposits":((isBiz?"Business Direct":"HSBC Premier")+" — Deposits"),dep,depT)}${balGroup(isBOC?"Investments":((isBiz?"Business Direct":"HSBC Premier")+" — Investments"),inv,invT)}${balGroup(isBOC?"Loans":"Credit Facilities",cf,cfT,true)}${balGroup("Other Accounts — Credit Card",cc,ccT,true)}</div>`;
+  const secName={hkd_savings:"HKD Savings",hkd_current:"HKD Current",fcy_savings:"Foreign Currency Savings"};
+  const _txnSections=isBOC?["hkd_savings","hkd_current"]:["hkd_savings","hkd_current","fcy_savings"];
+  const txnBlock=_txnSections.map(sk=>{
+    const rows=txns.filter(t=>t.section===sk);
+    if(!rows.length&&sk!=="fcy_savings") return "";
+    const fcy=sk==="fcy_savings";
+    const body=rows.length
+      ?rows.map(t=>`<tr><td style="white-space:nowrap">${esc(t.date)}</td>${fcy?`<td>${esc(t.ccy||"")}</td>`:""}<td>${esc(t.details)}</td><td class="num" style="color:var(--accent)">${t.deposit?fmt(t.deposit):""}</td><td class="num" style="color:#c2554e">${t.withdrawal?fmt(t.withdrawal):""}</td><td class="num">${t.balance!=null?fmt(t.balance):""}</td></tr>`).join("")
+      :`<tr><td colspan="${fcy?6:5}" style="color:var(--muted);font-size:12px;padding:10px 0">No FCY transactions this period.</td></tr>`;
+    return `<div style="font-weight:700;font-size:13.5px;margin:16px 0 6px">${secName[sk]}</div>
+      <table><thead><tr><th>Date</th>${fcy?"<th>CCY</th>":""}<th>Details</th><th class="num">Deposit</th><th class="num">Withdrawal</th><th class="num">Balance</th></tr></thead><tbody>${body}</tbody></table>`;
+  }).join("");
+  const history=txns.length?`<div style="padding:18px 24px;border-top:1px solid var(--line)"><h3 style="margin:0">Transaction History</h3>${txnBlock}</div>`:"";
+
+  // ---- Accounts tab: all transactions for this bank, grouped by year ----
+  const allBankTxns=(db.transactions||[]).filter(t=>!bank||!t.bank||canonBank(t.bank)===canonBank(bank));
+  const years=[...new Set(allBankTxns.map(t=>(t.statement_date||"").slice(0,4)).filter(Boolean))].sort().reverse();
+  const firstYear=years[0]||"";
+  // Populate global for pagination + export (sort if requested)
+  years.forEach(yr=>{
+    let rows=allBankTxns.filter(t=>(t.statement_date||"").startsWith(yr));
+    const s=ACCT_SORT[yr];
+    if(s&&s.col){
+      rows=rows.slice().sort((a,b)=>{
+        let av,bv;
+        if(s.col==="deposit"){av=a.deposit||0;bv=b.deposit||0;}
+        else if(s.col==="withdrawal"){av=a.withdrawal||0;bv=b.withdrawal||0;}
+        else if(s.col==="balance"){av=a.balance!=null?a.balance:0;bv=b.balance!=null?b.balance:0;}
+        else if(s.col==="date"){av=a.date||"";bv=b.date||"";}
+        else if(s.col==="statement"){av=a.statement_date||"";bv=b.statement_date||"";}
+        else if(s.col==="section"){av=(a.section||"").replace(/_/g," ");bv=(b.section||"").replace(/_/g," ");}
+        else if(s.col==="ccy"){av=a.ccy||"";bv=b.ccy||"";}
+        else{av=a.details||"";bv=b.details||"";}
+        const isNum=["deposit","withdrawal","balance"].includes(s.col);
+        return s.dir*(isNum?(av-bv):String(av).localeCompare(String(bv)));
+      });
+    }
+    ACCT_TX[yr]=rows;
+    if(!(yr in ACCT_PAGE))ACCT_PAGE[yr]=1;
+  });
+  ACCT_YEAR_ACTIVE=firstYear;
+  const CAT_IN=`<option value="">— Category —</option><optgroup label="Income"><option>Service Fee / Revenue</option><option>Interest Income</option><option>Dividend Income</option><option>Other Income</option></optgroup><optgroup label="Transfers In"><option>Internal Transfer In</option><option>FX Transfer In</option></optgroup>`;
+  const CAT_OUT=`<option value="">— Category —</option><optgroup label="Expenses"><option>Bank Charges</option><option>Professional Fees</option><option>Vendors</option><option>Operating Expenses</option><option>Administrative Expenses</option><option>Travel &amp; Entertainment</option><option>Salary</option><option>MPF</option><option>Insurance</option><option>Employee Benefit</option><option>Tax Payment</option><option>Donation</option><option>Other Expenses</option></optgroup><optgroup label="Transfers Out"><option>Transfer to BOC CaaS</option><option>Transfer to HSBC COIN</option><option>Internal Transfer</option><option>FX Transfer</option><option>Director's Loan</option><option>Asset Purchase</option><option>Credit Card Payment</option></optgroup>`;
+  const autoDetect=t=>{
+    const p=matchPayee(t.details); if(p&&p.category) return p.category;
+    const d=(t.details||"").toUpperCase();
+    const isFX=/\bFX\b.*(SELL|BUY|TRANSFER)|FOREIGN EXCHANGE|TOFCY|TO FCY/.test(d);
+    const isXfer=/TOCHECKING|TO CHECKING|TOSAVINGS|TO SAVINGS|\bTRF\b/.test(d);
+    if(isFX) return t.deposit?"FX Transfer In":"FX Transfer";
+    if(isXfer) return t.deposit?"Internal Transfer In":"Internal Transfer";
+    return "";
+  };
+  const autoRemark=t=>{if(t.remark)return t.remark;const key=txKey(t);const stored=(M.tx_annotations||{})[key];if(stored&&stored.remark!=null)return stored.remark;const p=matchPayee(t.details);return p&&p.remark?p.remark:"";};
+  const catOpt=t=>{
+    if(!t.deposit&&!t.withdrawal) return '<option value="">—</option>';
+    const key=txKey(t);const stored=(M.tx_annotations||{})[key];
+    const auto=t.category||(stored&&stored.category?stored.category:autoDetect(t));
+    let html=t.deposit?CAT_IN:CAT_OUT;
+    if(auto) html=html.replace(`<option>${auto}</option>`,`<option selected>${auto}</option>`);
+    return html;
+  };
+  const txRow=(t,i,yr)=>`<tr style="vertical-align:middle">
+    <td style="color:var(--muted);white-space:nowrap;font-size:12px">${esc(t.statement_date||"")}</td>
+    <td style="font-size:11.5px;white-space:nowrap">${esc((t.section||"").replace(/_/g," "))}${t.section==="fcy_savings"&&t.ccy?` <span style="font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:1px 5px">${esc(t.ccy.toUpperCase())}</span>`:""}</td>
+    <td style="white-space:nowrap;font-size:12px;color:var(--muted)">${esc(t.ccy||"")}</td>
+    <td style="white-space:nowrap">${esc(t.date||"")}</td>
+    <td>${esc(t.details||"")}</td>
+    <td class="num" style="color:var(--accent)">${t.deposit?fmt(t.deposit):""}</td>
+    <td class="num" style="color:#c2554e">${t.withdrawal?fmt(t.withdrawal):""}</td>
+    <td class="num">${t.balance!=null?fmt(t.balance):""}</td>
+    <td>${(t.deposit||t.withdrawal)?`<select id="txCat_${yr}_${i}" onchange="saveTxAnnotation('tx','${yr}',${i})" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:160px;background:var(--card);color:var(--fg)">${catOpt(t)}</select>`:""}</td>
+    <td><input id="txCmt_${yr}_${i}" type="text" placeholder="Add comment…" value="${esc(autoRemark(t))}" onchange="saveTxAnnotation('tx','${yr}',${i})" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:200px;background:var(--card);color:var(--fg);font-family:inherit"></td>
+  </tr>`;
+  const PAGE_SIZE=200;
+  const yrBtnStyle=(yr)=>`padding:15px 20px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${yr===firstYear?"var(--accent)":"transparent"};color:${yr===firstYear?"var(--accent)":"var(--muted)"};margin-bottom:-1px`;
+  const yearTabs=years.map(yr=>`<button data-yr-btn="${yr}" onclick="acctYear('${yr}')" style="${yrBtnStyle(yr)}">${yr}</button>`).join("");
+  const exportBtn=`<button id="acctExportBtn" onclick="exportAcctCSV(ACCT_YEAR_ACTIVE)" style="border:1px solid #ccc;background:none;border-radius:8px;padding:6px 15px;font-size:12px;cursor:pointer;color:var(--fg);font-family:inherit">⬇ Export CSV</button>`;
+  const saveBtn=`<button id="acctSaveBtn" onclick="saveAnnotations()" style="border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:6px 15px;font-size:12px;cursor:pointer;font-family:inherit">Save</button>`;
+  const sumRow=(t,i,yr)=>`<tr>
+    <td style="color:var(--muted);white-space:nowrap;font-size:12px">${esc(t.statement_date||"")}</td>
+    <td style="font-size:11.5px;white-space:nowrap">${esc((t.section||"").replace(/_/g," "))}</td>
+    <td style="white-space:nowrap">${esc(t.date||"")}</td>
+    <td>${esc(t.details||"")}</td>
+    <td class="num" style="color:var(--accent)">${t.deposit?fmt(t.deposit):""}</td>
+    <td class="num" style="color:#c2554e">${t.withdrawal?fmt(t.withdrawal):""}</td>
+    <td>${(t.deposit||t.withdrawal)?`<select id="smCat_${yr}_${i}" onchange="saveTxAnnotation('sm','${yr}',${i})" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;min-width:160px;background:var(--card);color:var(--fg)">${catOpt(t)}</select>`:""}</td>
+    <td><input id="smCmt_${yr}_${i}" type="text" placeholder="Add comment…" value="${esc(autoRemark(t))}" onchange="saveTxAnnotation('sm','${yr}',${i})" style="font-size:12px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;width:180px;background:var(--card);color:var(--fg);font-family:inherit"></td>
+  </tr>`;
+  const sumThead=`<thead><tr style="height:38px;vertical-align:middle"><th>Statement</th><th>Section</th><th>Date</th><th>Details</th><th class="num">In</th><th class="num">Out</th><th>Category</th><th>Comment</th></tr></thead>`;
+  const sumSubSection=(label,groupItems,color,yr)=>{
+    if(!groupItems.length) return "";
+    const total=groupItems.reduce((s,{t})=>s+(t.deposit||0)+(t.withdrawal||0),0);
+    return `<div style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)">
+        <span style="font-size:12.5px;font-weight:600;color:var(--muted)">${label}</span>
+        <span style="font-size:13px;font-weight:720;color:${color}">${fmt(total)}</span>
+      </div>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">${sumThead}<tbody>${groupItems.map(({t,i})=>sumRow(t,i,yr)).join("")}</tbody></table></div>
+    </div>`;
+  };
+  const summaryPanel=yr=>{
+    const rows=ACCT_TX[yr]||[];
+    const indexed=rows.map((t,i)=>({t,i}));
+    const deposits=indexed.filter(({t})=>t.deposit);
+    const withdrawals=indexed.filter(({t})=>t.withdrawal);
+
+    const depositsNet=deposits;
+    const withdrawalsNet=withdrawals;
+
+    const depTotal=depositsNet.reduce((s,{t})=>s+(t.deposit||0),0);
+    const outTotal=withdrawalsNet.reduce((s,{t})=>s+(t.withdrawal||0),0);
+    const effectiveCat=t=>{const key=txKey(t);const stored=(M.tx_annotations||{})[key];return t.category||(stored&&stored.category?stored.category:autoDetect(t));};
+    const outInternal=withdrawalsNet.filter(({t})=>effectiveCat(t)==="Internal Transfer");
+    const outFX=withdrawalsNet.filter(({t})=>effectiveCat(t)==="FX Transfer");
+    const outOther=withdrawalsNet.filter(({t})=>!["Internal Transfer","FX Transfer"].includes(effectiveCat(t)));
+    const secHeader=(title,total,color,sub)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:2px solid var(--line);margin-bottom:4px"><div><h4 style="margin:0;font-size:14px">${title}</h4>${sub?`<div style="font-size:11px;color:var(--muted)">${sub}</div>`:""}</div><span style="font-size:15px;font-weight:720;color:${color}">${fmt(total)}</span></div>`;
+
+    const inSection=depositsNet.length
+      ?`<div style="margin-bottom:28px">${secHeader("Incoming",depTotal,"var(--accent)")}<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">${sumThead}<tbody>${depositsNet.map(({t,i})=>sumRow(t,i,yr)).join("")}</tbody></table></div></div>`
+      :`<div style="color:var(--muted);padding:12px 0;margin-bottom:20px">No incoming transactions.</div>`;
+    const outSection=withdrawalsNet.length
+      ?`<div>${secHeader("Outgoing",outTotal,"#c2554e")}${sumSubSection("Internal Transfer",outInternal,"#c2554e",yr)}${sumSubSection("FX Transfer",outFX,"#c2554e",yr)}${sumSubSection("Other",outOther,"#c2554e",yr)}</div>`
+      :"";
+    return `<div style="padding:20px 24px">${inSection}${outSection}</div>`;
+  };
+  const yearPanels=years.map(yr=>{
+    const rows=ACCT_TX[yr]||[];
+    const total=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));
+    let pages="";
+    for(let p=0;p<total;p++){
+      const sl=rows.slice(p*PAGE_SIZE,(p+1)*PAGE_SIZE);
+      const _s=ACCT_SORT[yr]||{};
+      const _th=(col,label,cls)=>`<th class="${cls||""}" onclick="sortAcctTable('${yr}','${col}')" style="cursor:pointer;user-select:none;white-space:nowrap">${label} <span style="font-size:10px;color:${_s.col===col?'var(--accent)':'var(--muted)'}">${_s.col===col?(_s.dir===1?'▲':'▼'):'⇅'}</span></th>`;
+      pages+=`<div id="acctPg_${yr}_${p+1}" style="display:${p===0?"":"none"}"><table style="width:100%;border-collapse:collapse"><thead><tr style="height:46px;vertical-align:middle">${_th('statement','Statement')}${_th('section','Section')}${_th('ccy','CCY')}${_th('date','Date')}${_th('details','Details')}${_th('deposit','Deposit','num')}${_th('withdrawal','Withdrawal','num')}${_th('balance','Balance','num')}<th>Category</th><th>Comment</th></tr></thead><tbody>${sl.map((t,i)=>txRow(t,p*PAGE_SIZE+i,yr)).join("")}</tbody></table></div>`;
+    }
+    const empty=rows.length===0?`<div style="padding:28px 24px;color:var(--muted)">No transactions for ${yr}.</div>`:"";
+    const pgBar=total>1?`<div style="display:flex;align-items:center;gap:12px;padding:11px 20px;border-top:1px solid var(--line);font-size:13px"><button id="acctPgPrev_${yr}" class="btn2" onclick="acctPage('${yr}',-1)" disabled>‹ Prev</button><span id="acctPgInfo_${yr}">Page 1 of ${total}</span><button id="acctPgNext_${yr}" class="btn2" onclick="acctPage('${yr}',1)"${total<=1?" disabled":""}>Next ›</button></div>`:`<div style="padding:8px 20px 10px;font-size:12px;color:var(--muted)">${rows.length} transaction${rows.length!==1?"s":""}</div>`;
+    return `<div data-yr-panel="${yr}" style="display:${yr===firstYear?"":"none"}">
+      <div data-acct-view="tx" style="display:${ACCT_VIEW_MODE==='summary'?'none':''}"><div style="overflow-x:auto">${empty}${pages}</div>${pgBar}</div>
+      <div data-acct-view="summary" style="display:${ACCT_VIEW_MODE==='summary'?'':'none'}">${summaryPanel(yr)}</div>
+    </div>`;
+  }).join("");
+  const _vBtn=(mode,label)=>`<button id="acctViewBtn_${mode}" onclick="acctViewSwitch('${mode}')" style="font-family:inherit;font-size:12px;padding:5px 16px;border:none;cursor:pointer;transition:background .15s;background:${ACCT_VIEW_MODE===mode?'var(--accent)':'none'};color:${ACCT_VIEW_MODE===mode?'#fff':'var(--fg)'}">${label}</button>`;
+  const viewToggle=`<div style="display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden">${_vBtn('tx','Transactions')}${_vBtn('summary','Summary')}</div>`;
+  const accountsPanel=years.length
+    ?`<div style="border-bottom:1px solid var(--line);padding:0 20px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex">${yearTabs}</div><div style="display:flex;align-items:center;gap:10px">${viewToggle}${exportBtn}${saveBtn}</div></div>${yearPanels}`
+    :`<div style="padding:24px;color:var(--muted)">No transaction history yet.</div>`;
+
+  const payeesPanel=(()=>{
+    const list=M.payees||[];
+    const rows=list.map(p=>`<tr>
+      <td><b>${esc(p.nickname||"")}</b></td>
+      <td style="color:var(--muted)">${esc(p.beneficiary_name||"")}</td>
+      <td style="font-family:monospace;font-size:12px">${esc(p.account||"")}</td>
+      <td>${esc(p.ccy||"")}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(p.bank||"")}</td>
+      <td style="font-size:12px">${esc(p.category||"—")}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(p.remark||"")}</td>
+      <td style="white-space:nowrap"><button class="btn sm" onclick="openPayeeForm('${esc(p.id)}')">Edit</button> <button class="btn sm" style="color:#c2554e" onclick="deletePayee('${esc(p.id)}')">Delete</button></td>
+    </tr>`).join("")||`<tr><td colspan="8" style="padding:20px;color:var(--muted);text-align:center">No payees yet — add one above.</td></tr>`;
+    return `<div style="padding:20px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div><h3 style="margin:0">Third Party Accounts</h3><div class="sub">Matched accounts auto-fill category &amp; remark in transactions</div></div>
+        <button class="btn primary" onclick="openPayeeForm('new')">+ Add payee</button>
+      </div>
+      <div id="payeeFormArea" style="margin-bottom:4px"></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table><thead><tr><th>Nickname</th><th>Beneficiary name</th><th>Account</th><th>CCY</th><th>Bank</th><th>Category</th><th>Remark</th><th></th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </div>
+    </div>`;
+  })();
+  const tabBtn=(id,label,active)=>`<button id="tabBtn_${id}" onclick="stmtTab('${id}')" style="padding:12px 18px;font-size:13.5px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${active?"var(--accent)":"transparent"};color:${active?"var(--accent)":"var(--muted)"};margin-bottom:-1px">${label}</button>`;
+  const showPayees=canonBank(bank)==="HSBC CaaS";
+  const mainTabs=`<div style="display:flex;border-bottom:1px solid var(--line);padding:0 20px">${tabBtn("st","Statements",true)}${tabBtn("ac","Accounts",false)}${showPayees?tabBtn("py","Payees",false):""}</div>`;
+
+  return `<div class="card" style="padding:0;overflow:hidden">${mainTabs}<div id="tabPanel_st">${head}${monthNav}${overview}${portfolio}${history}</div><div id="tabPanel_ac" style="display:none">${accountsPanel}</div>${showPayees?`<div id="tabPanel_py" style="display:none">${payeesPanel}</div>`:""}</div>`;
 }
 async function newCompanyFromBR(files){
   const base=files[0].name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").trim();
@@ -345,7 +858,7 @@ async function newCompanyFromBR(files){
 }
 function bindCompanyList(){
   $("createNew").onclick=()=>openCoForm({},null);
-  document.querySelectorAll("[data-openco]").forEach(r=>r.onclick=()=>{openCompany=r.dataset.openco;coEdit=false;brEditMode=false;pendingCap=null;render();});
+  document.querySelectorAll("[data-openco]").forEach(r=>r.onclick=()=>{openCompany=r.dataset.openco;coEdit=false;brEditMode=false;pendingCap=null;coTab="info";render();});
 }
 function parseBR(text){
   const out={},t=(text||"").replace(/\r/g,"");
@@ -437,7 +950,7 @@ async function handleBRFile(file){
 }
 function bindCompanyDetail(){
   const c=company(openCompany);if(c)$("pTitle").textContent=c.name;
-  $("backCo").onclick=()=>{openCompany=null;coEdit=false;brEditMode=false;pendingCap=null;render();};
+  $("backCo").onclick=()=>{openCompany=null;coEdit=false;brEditMode=false;pendingCap=null;coTab="info";render();};
   $("editCo").onclick=()=>{coEdit=!coEdit;render();};
   document.querySelectorAll("[data-del-company]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this company and its details?"))return;const id=b.dataset.delCompany;M.companies=M.companies.filter(x=>x.id!==id);M.accounts=M.accounts.filter(a=>!(a.type==="company"&&a.companyId===id));openCompany=null;coEdit=false;brEditMode=false;pendingCap=null;await save();render();});
   document.querySelectorAll("[data-share]").forEach(inp=>inp.onchange=async()=>{const[cid,pid]=inp.dataset.share.split("|");const c=company(cid);if(!c)return;c.shareholders=c.shareholders||[];const pct=Math.max(0,Math.min(100,+inp.value||0));const ex=c.shareholders.find(s=>s.personId===pid);if(ex)ex.pct=pct;else c.shareholders.push({personId:pid,pct});c.shareholders=c.shareholders.filter(s=>s.pct>0);await save();render();});
@@ -481,11 +994,214 @@ async function confirmCapture(){
   pendingCap=null; render();
 }
 function cancelCapture(){ pendingCap=null; render(); }
+function buildBankNav(){
+  const el=$("bankNav"); if(!el) return;
+  const banks=[...new Set(((M&&M.accounts)||[]).map(a=>canonBank(a.institution)).filter(Boolean))].sort();
+  el.innerHTML=banks.map(b=>`<button data-v="bank:${esc(b)}" class="sub">• ${esc(b)}</button>`).join("");
+}
 function render(){
+  const _contentEl=document.querySelector('.content'); if(_contentEl) _contentEl.style.maxWidth='';
+  buildBankNav();
+  if(view&&view.indexOf("bank:")===0){
+    const bank=view.slice(5);
+    $("content").innerHTML=`<div id="bankBody"><div class="card"><div class="sub">Loading ${esc(bank)}…</div></div></div>`;
+    $("pTitle").textContent=bank; $("pSub").textContent="Statements & balances";
+    document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.v===view));
+    bindBankPage(bank);
+    return;
+  }
   $("content").innerHTML=VIEWS[view]();
-  $("pTitle").textContent=TITLES[view][0];$("pSub").textContent=TITLES[view][1];
+  $("pTitle").textContent=(TITLES[view]||["",""])[0];$("pSub").textContent=(TITLES[view]||["",""])[1];
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.v===view));
   if(BIND[view])BIND[view]();
+}
+function coTabSwitch(t){
+  coTab=t;
+  ["info","docs"].forEach(k=>{
+    const p=document.getElementById("coPanel_"+k);if(p)p.style.display=k===t?"":"none";
+    const b=document.getElementById("coTabBtn_"+k);if(b){b.style.color=k===t?"var(--accent)":"var(--muted)";b.style.borderBottomColor=k===t?"var(--accent)":"transparent";}
+  });
+}
+let _dhActive={};
+function dhTab(safeKey,type){
+  _dhActive[safeKey]=type;
+  document.querySelectorAll('[data-dhpanel="'+safeKey+'"]').forEach(p=>p.style.display="none");
+  const panel=document.getElementById("dhp_"+safeKey+"_"+type);
+  if(panel)panel.style.display="";
+  document.querySelectorAll('[data-dhbtn="'+safeKey+'"]').forEach(b=>{
+    const on=b.dataset.dhtype===type;
+    b.style.color=on?"var(--accent)":"var(--muted)";
+    b.style.borderBottomColor=on?"var(--accent)":"transparent";
+  });
+}
+function stmtTab(tab){
+  ["st","ac","py"].forEach(t=>{
+    const btn=$("tabBtn_"+t),panel=$("tabPanel_"+t); if(!btn||!panel) return;
+    const on=t===tab;
+    btn.style.color=on?"var(--accent)":"var(--muted)"; btn.style.borderBottomColor=on?"var(--accent)":"transparent";
+    panel.style.display=on?"":"none";
+  });
+  const c=document.querySelector('.content'); if(c) c.style.maxWidth=tab==='ac'?'none':'';
+}
+function txKey(t){return[t.statement_date||"",t.section||"",t.date||"",t.details||"",t.deposit!=null?t.deposit:"",t.withdrawal!=null?t.withdrawal:""].join("|");}
+let _saveTxTimer=null;
+async function saveTxAnnotation(view,yr,i){
+  const t=(ACCT_TX[yr]||[])[i]; if(!t)return;
+  const cat=(document.getElementById(view+"Cat_"+yr+"_"+i)||{}).value||"";
+  const cmt=(document.getElementById(view+"Cmt_"+yr+"_"+i)||{}).value||"";
+  // sync the other view's elements so both show the same value
+  const other=view==="tx"?"sm":"tx";
+  const oCat=document.getElementById(other+"Cat_"+yr+"_"+i);if(oCat)oCat.value=cat;
+  const oCmt=document.getElementById(other+"Cmt_"+yr+"_"+i);if(oCmt)oCmt.value=cmt;
+  // update in-memory transaction object
+  t.category=cat; t.remark=cmt;
+  // update cache so fresh renders use the updated value
+  Object.values(_BANK_CACHE).forEach(c=>{const tx=(c.transactions||[]).find(x=>x.id===t.id);if(tx){tx.category=cat;tx.remark=cmt;}});
+  // save to Supabase + local annotations.json — debounced 800ms
+  if(_saveTxTimer)clearTimeout(_saveTxTimer);
+  _saveTxTimer=setTimeout(async()=>{
+    if(t.id){const{error}=await sb.from("statement_lines").update({category:cat||null,remark:cmt||null}).eq("id",t.id);if(error)console.error("saveTxAnnotation:",error.message);}
+    const btn=$("acctSaveBtn");if(btn){btn.textContent="✓ Saved";setTimeout(()=>{if(btn.textContent==="✓ Saved")btn.textContent="Save";},1500);}
+  },800);
+}
+async function saveAnnotations(){
+  if(_saveTxTimer){clearTimeout(_saveTxTimer);}
+  const btn=$("acctSaveBtn"); if(btn){btn.disabled=true;btn.textContent="Saving…";}
+  // flush any pending annotation saves
+  if(ACCT_YEAR_ACTIVE){
+    const rows=ACCT_TX[ACCT_YEAR_ACTIVE]||[];
+    const updates=rows.filter(t=>t.id&&(t.category||t.remark)).map(t=>sb.from("statement_lines").update({category:t.category||null,remark:t.remark||null}).eq("id",t.id));
+    await Promise.all(updates);
+  }
+  await save();
+  if(btn){btn.textContent="✓ Saved";setTimeout(()=>{btn.disabled=false;btn.textContent="Save";},1800);}
+}
+function matchPayee(details){
+  const d=(details||"").toUpperCase().replace(/[\s\-]/g,"");
+  return (M.payees||[]).find(p=>{
+    const acct=(p.account||"").replace(/[\s\-]/g,"");
+    const bname=(p.beneficiary_name||"").toUpperCase().replace(/\s+/g,"");
+    const nick=(p.nickname||"").toUpperCase().replace(/[\s\-]/g,"");
+    if(acct&&acct.length>4&&d.includes(acct)) return true;
+    if(bname&&bname.length>3&&d.includes(bname)) return true;
+    // Statements truncate long names — match on first 12 chars of beneficiary name
+    if(bname&&bname.length>14&&d.includes(bname.slice(0,12))) return true;
+    // Nickname match for distinctive aliases (6+ chars)
+    if(nick&&nick.length>=6&&d.includes(nick)) return true;
+    return false;
+  });
+}
+function openPayeeForm(id){
+  const p=id==="new"?{}:(M.payees||[]).find(x=>x.id===id)||{};
+  const area=document.getElementById("payeeFormArea"); if(!area)return;
+  const CAT_ALL=["Service Fee / Revenue","Interest Income","Dividend Income","Other Income","Internal Transfer In","FX Transfer In","Bank Charges","Professional Fees","Vendors","Operating Expenses","Administrative Expenses","Travel & Entertainment","Salary","MPF","Insurance","Employee Benefit","Tax Payment","Donation","Other Expenses","Transfer to BOC CaaS","Transfer to HSBC COIN","Internal Transfer","FX Transfer","Director's Loan","Asset Purchase","Credit Card Payment"];
+  const catOpts=`<option value="">— None —</option>`+CAT_ALL.map(c=>`<option${p.category===c?" selected":""}>${esc(c)}</option>`).join("");
+  area.innerHTML=`<div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">NICKNAME</div><input id="pfNick" class="inp" value="${esc(p.nickname||"")}" placeholder="e.g. CAAS BOC CHECKING"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">BENEFICIARY NAME</div><input id="pfBname" class="inp" value="${esc(p.beneficiary_name||"")}" placeholder="Name on bank account"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">ALTERNATIVE NAME</div><input id="pfAlt" class="inp" value="${esc(p.alt_name||"")}" placeholder="Friendly alias, e.g. Francis" oninput="const a=this.value.trim(),b=($('pfBname').value||$('pfNick').value||'').trim();$('pfRem').value=b&&a?b+' – '+a:a||b||$('pfRem').value;"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">ACCOUNT NUMBER</div><input id="pfAcct" class="inp" value="${esc(p.account||"")}" placeholder="e.g. 61120221757"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">CCY</div><input id="pfCcy" class="inp" value="${esc(p.ccy||"HKD")}" placeholder="HKD"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">BANK</div><input id="pfBank" class="inp" value="${esc(p.bank||"")}" placeholder="e.g. HSBC (004)"></div>
+      <div><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">AUTO-FILL CATEGORY</div><select id="pfCat" class="inp" style="padding:8px 10px">${catOpts}</select></div>
+      <div style="grid-column:1/-1"><div style="font-size:11px;font-weight:700;margin-bottom:4px;color:var(--muted)">AUTO-FILL REMARK</div><input id="pfRem" class="inp" style="width:100%;box-sizing:border-box" value="${esc(p.remark||"")}" placeholder="Comment to auto-fill on matching transactions"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn primary" onclick="savePayeeForm('${esc(id==="new"?"new":p.id||"")}')">Save payee</button>
+      <button class="btn" onclick="document.getElementById('payeeFormArea').innerHTML=''">Cancel</button>
+    </div>
+  </div>`;
+}
+async function savePayeeForm(id){
+  if(!M.payees)M.payees=[];
+  const p=id==="new"?{id:uid()}:(M.payees.find(x=>x.id===id)||{id:uid()});
+  p.nickname=($("pfNick")||{}).value||""; p.beneficiary_name=($("pfBname")||{}).value||"";
+  p.alt_name=($("pfAlt")||{}).value||"";
+  p.account=($("pfAcct")||{}).value||""; p.ccy=($("pfCcy")||{}).value||"";
+  p.bank=($("pfBank")||{}).value||""; p.category=($("pfCat")||{}).value||"";
+  p.remark=($("pfRem")||{}).value||"";
+  if(id==="new") M.payees.push(p); else{const idx=M.payees.findIndex(x=>x.id===p.id);if(idx>=0)M.payees[idx]=p;else M.payees.push(p);}
+  await save(); render();
+}
+async function deletePayee(id){
+  if(!confirm("Delete this payee?"))return;
+  M.payees=(M.payees||[]).filter(p=>p.id!==id);
+  await save(); render();
+}
+function acctYear(yr){
+  ACCT_YEAR_ACTIVE=yr;
+  document.querySelectorAll("[data-yr-panel]").forEach(p=>p.style.display=p.dataset.yrPanel===yr?"":"none");
+  document.querySelectorAll("[data-yr-btn]").forEach(b=>{const on=b.dataset.yrBtn===yr; b.style.color=on?"var(--accent)":"var(--muted)"; b.style.borderBottomColor=on?"var(--accent)":"transparent";});
+}
+let ACCT_PAGE={}, ACCT_TX={}, ACCT_YEAR_ACTIVE="", ACCT_SORT={}, ACCT_VIEW_MODE="summary";
+function acctPage(yr,delta){
+  const rows=ACCT_TX[yr]||[]; const total=Math.max(1,Math.ceil(rows.length/200));
+  ACCT_PAGE[yr]=Math.max(1,Math.min(total,(ACCT_PAGE[yr]||1)+delta));
+  const pg=ACCT_PAGE[yr];
+  for(let i=1;i<=total;i++){const el=document.getElementById("acctPg_"+yr+"_"+i);if(el)el.style.display=i===pg?"":"none";}
+  const info=document.getElementById("acctPgInfo_"+yr); if(info)info.textContent="Page "+pg+" of "+total;
+  const prev=document.getElementById("acctPgPrev_"+yr); if(prev)prev.disabled=pg<=1;
+  const next=document.getElementById("acctPgNext_"+yr); if(next)next.disabled=pg>=total;
+}
+function exportAcctCSV(yr){
+  const rows=ACCT_TX[yr]||[];
+  const heads=["Statement","Section","CCY","Date","Details","Deposit","Withdrawal","Balance","Category","Comment"];
+  const data=rows.map((t,i)=>[t.statement_date||"",(t.section||"").replace(/_/g," "),t.ccy||"",t.date||"",t.details||"",
+    t.deposit!=null?t.deposit:"",t.withdrawal!=null?t.withdrawal:"",t.balance!=null?t.balance:"",
+    (document.getElementById("txCat_"+yr+"_"+i)||document.getElementById("smCat_"+yr+"_"+i)||{}).value||"",(document.getElementById("txCmt_"+yr+"_"+i)||document.getElementById("smCmt_"+yr+"_"+i)||{}).value||""]);
+  const csv=[heads,...data].map(r=>r.map(v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"').join(",")).join("\n");
+  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,﻿"+encodeURIComponent(csv);a.download=yr+"_transactions.csv";a.click();
+}
+function acctViewSwitch(mode){
+  ACCT_VIEW_MODE=mode;
+  document.querySelectorAll("[data-acct-view]").forEach(el=>el.style.display=el.dataset.acctView===mode?"":"none");
+  ["tx","summary"].forEach(m=>{
+    const b=document.getElementById("acctViewBtn_"+m);
+    if(!b)return;
+    const on=m===mode;
+    b.style.background=on?"var(--accent)":"none";
+    b.style.color=on?"#fff":"var(--fg)";
+  });
+}
+function sortAcctTable(yr,col){
+  const cur=ACCT_SORT[yr]||{col:null,dir:1};
+  ACCT_SORT[yr]={col,dir:cur.col===col?-cur.dir:1};
+  ACCT_PAGE[yr]=1;
+  if(window._stmtRedraw) window._stmtRedraw();
+}
+async function bindBankPage(bank){
+  const el=$("bankBody"); if(!el) return;
+  const nums=new Set(((M&&M.accounts)||[]).filter(a=>canonBank(a.institution)===canonBank(bank)).map(a=>(a.number||"").replace(/\D/g,"")).filter(Boolean));
+  let db=null;
+  try{ db=await loadStatementsDB(bank); }catch(e){}
+  const myStmts=db?(db.statements||[]).filter(s=>{
+    if(canonBank(s.bank||"")!==canonBank(bank)) return false;
+    if(!nums.size) return true;
+    return nums.has(((s.meta&&s.meta.account)||"").replace(/\D/g,""));
+  }):[];
+  if(!myStmts.length){ el.innerHTML=bankNoData(bank,!!db); return; }
+  const dates=myStmts.map(s=>s.date).filter(Boolean).sort();
+  let i=dates.length-1;
+  window._stmtNav=(d)=>{i=dates.indexOf(d);if(i<0)i=dates.length-1;draw();};
+  window._stmtRedraw=()=>{const savedYr=ACCT_YEAR_ACTIVE;draw();stmtTab('ac');if(savedYr)acctYear(savedYr);acctViewSwitch(ACCT_VIEW_MODE);};
+  const draw=()=>{
+    el.innerHTML=hsbcStatementHTML(db,dates[i],bank,dates);
+    const sel=$("stmtDateSel");
+    if(sel) sel.onchange=()=>{const yr=sel.value;const yd=dates.filter(d=>d.startsWith(yr));if(yd.length){i=dates.indexOf(yd[yd.length-1]);draw();}};
+  };
+  draw();
+}
+function bankNoData(bank,dbOk){
+  const accts=((M&&M.accounts)||[]).filter(a=>canonBank(a.institution)===canonBank(bank));
+  const a0=accts[0]||{};
+  const holder=(a0.holders||[]).map(h=>person(h.personId)?person(h.personId).name:"").filter(Boolean).join(", ");
+  const head=`<div style="background:linear-gradient(135deg,#c00,#7a0000);color:#fff;padding:20px 26px">
+    <div style="font-size:12px;letter-spacing:4px;font-weight:700;opacity:.9">${esc(bank)}</div>
+    <div style="font-size:23px;font-weight:700;margin-top:3px">Statement</div>
+    <div style="font-size:13.5px;margin-top:14px"><b>${esc(holder||"Account holder")}</b><br><span style="opacity:.85">Account ${esc(a0.number||"—")}${accts.length>1?" (+"+(accts.length-1)+" more)":""}</span></div></div>`;
+  const msg=dbOk?`No statements extracted for ${esc(bank)} yet. Drop a PDF in this account's <b>Document hub</b> and tag it <b>Statement</b> to auto-scan it, or use the <a href="/cloud/statements.html" style="color:var(--accent)">Statement Extractor</a>.`:`The local statement database isn't reachable — start the local server to see ${esc(bank)} statements.`;
+  return `<div class="card" style="padding:0;overflow:hidden">${head}<div style="padding:18px 24px"><div class="sub" style="line-height:1.7;margin:0">${msg}</div></div></div>`;
 }
 const VIEWS={
   insights(){
@@ -510,92 +1226,252 @@ const VIEWS={
     return `<div class="card"><h3>Document log</h3><div class="sub">${ev.length} document${ev.length===1?"":"s"} across companies and accounts</div>
       <table><thead><tr><th>Date</th><th>Belongs to</th><th>Document</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   },
-  dashboard(){
-    const total=totalAssets();
-    let companyHeld=0,personalHeld=0;M.accounts.forEach(a=>{a.type==="company"?companyHeld+=a.balance:personalHeld+=a.balance;});
-    const ppl=M.people.map(p=>({p,nw:personNetWorth(p.id)})).sort((a,b)=>b.nw-a.nw);
-    const reconciled=Math.round(ppl.reduce((s,x)=>s+x.nw,0));
-    let cards=`<div class="kpis"><div class="kpi"><div class="l">Total assets</div><div class="v">${fmt(total)}</div></div>
-      <div class="kpi"><div class="l">Personal-held</div><div class="v">${fmt(personalHeld)}</div></div>
-      <div class="kpi"><div class="l">Company-held</div><div class="v">${fmt(companyHeld)}</div></div></div>`;
-    const rows=ppl.map(x=>`<tr><td style="font-weight:600">${x.p.name}</td><td class="num pos" style="font-weight:600">${fmt(x.nw)}</td><td class="num">${total?(x.nw/total*100).toFixed(1):0}%</td></tr>`).join("")||`<tr><td colspan="3" class="hint">Add people and accounts to see net worth.</td></tr>`;
-    return cards+`<div class="card"><h3>Net worth by person</h3><div class="sub">Each account attributed by ownership %, then summed per person</div>
-      <table><thead><tr><th>Person</th><th class="num">Net worth</th><th class="num">Share of total</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="sub" style="margin:12px 0 0">Sum of all people: <b>${fmt(reconciled)}</b> ${reconciled===Math.round(total)?"✓ reconciles with total assets":"⚠ does not match total — check ownership %"}</div></div>`;
-  },
+  dashboard(){ return `<div id="dashBody"><div class="card"><div class="sub">Loading net worth from your statements…</div></div></div>`; },
   individual(){
     const addForm=`<div class="card"><h3>Add an individual</h3><div class="sub">People who can own accounts (single, joint, or via company shares)</div>
       <div class="row"><div class="field"><label class="lbl">Name</label><input id="npName" placeholder="e.g. Amy"/></div><button class="btn primary" id="addPerson">Add person</button></div></div>`;
-    const rows=M.people.map(p=>`<div class="ownrow" style="padding:9px 0;border-bottom:1px solid var(--line)"><input class="cell" data-pname="${p.id}" value="${esc(p.name)}" style="flex:1;text-align:left;font-weight:600"/><button class="del" data-del-person="${p.id}">Remove</button></div>`).join("")||`<div class="hint">No individuals yet.</div>`;
+    const rows=M.people.map(p=>{
+      const held=M.accounts.filter(a=>(a.holders||[]).some(h=>h.personId===p.id)).length;
+      const del=held?`<span class="sub" style="margin:0 8px 0 0">🔒 ${held} account${held>1?"s":""}</span><button class="del" disabled title="Holds an account — reassign or remove the account first" style="opacity:.4;cursor:not-allowed">Remove</button>`:`<button class="del" data-del-person="${p.id}">Remove</button>`;
+      return `<div class="ownrow" style="padding:9px 0;border-bottom:1px solid var(--line)"><input class="cell" data-pname="${p.id}" value="${esc(p.name)}" style="flex:1;text-align:left;font-weight:600"/>${del}</div>`;
+    }).join("")||`<div class="hint">No individuals yet.</div>`;
     const list=`<div class="card"><h3>Individuals</h3><div class="sub">${M.people.length} ${M.people.length===1?"individual":"individuals"}</div><div style="margin-top:6px">${rows}</div></div>`;
     return addForm+list;
   },
+  settings(){ return `<div class="card"><h3>Change password</h3>
+    <div style="display:grid;gap:8px;max-width:320px">
+      <input id="cpNew" type="password" placeholder="New password" style="padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px"/>
+      <input id="cpCon" type="password" placeholder="Confirm new password" style="padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13.5px"/>
+      <button class="btn primary" id="cpBtn">Change password</button>
+      <div id="cpMsg" style="font-size:12.5px"></div>
+    </div></div>`; },
+  hsbcStmt(){ return `<div id="hsbcStmtBody"><div class="card"><div class="sub">Loading your latest statement…</div></div></div>`; },
   company(){ return openCompany ? companyDetail(openCompany) : companyList(); },
   accounts(){
+    if(openAccount) return accountDetail(openAccount);
     const single=M.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
     const comps=M.companies.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
     const rows=M.accounts.map(a=>{
       const own=ownersOf(a).map(o=>`${esc(person(o.personId)?person(o.personId).name:"?")}${o.pct!==100?" "+o.pct+"%":""}`).join(", ");
-      const holder=a.type==="company"?("Company · "+esc(company(a.companyId)?(company(a.companyId).short||company(a.companyId).name):"?")):("Individual · "+(own||"—"));
-      return `<tr><td><div style="font-weight:600">${esc(a.name)}</div><div style="color:var(--muted);font-size:11px">${esc(a.institution||"")}${a.number?" · "+esc(a.number):""}</div></td>
+      const holder=a.type==="company"?esc(company(a.companyId)?(company(a.companyId).short||company(a.companyId).name):"?"):(own||"—");
+      return `<tr><td data-openacct="${a.id}" style="cursor:pointer"><div style="font-weight:600">${esc(a.institution||"Account")}</div><div style="color:var(--muted);font-size:11px">${esc(a.number||"—")} ›</div></td>
         <td><span class="pill ${a.type}">${a.type}</span></td>
         <td style="font-size:12.5px;color:var(--muted)">${holder}</td>
-        <td class="num"><input class="cell" data-bal="${a.id}" type="number" value="${a.balance}" style="width:120px"/></td>
-        <td class="num"><button class="del" data-del-acct="${a.id}">Remove</button></td></tr>`;
-    }).join("")||`<tr><td colspan="5" class="hint">No accounts yet — add one above.</td></tr>`;
-    return `<div class="card"><h3>Add an account</h3><div class="sub">Held by an individual or a company — this drives the per-person net worth</div>
-      <div class="row" style="margin-bottom:10px">
-        <div class="field" style="flex:2"><label class="lbl">Account name</label><input id="naName" placeholder="Operating Account"/></div>
-        <div class="field"><label class="lbl">Type</label><select id="naType"><option value="individual">Individual</option><option value="company">Company</option></select></div>
+        <td class="num"><button class="btn sm" data-del-acct="${a.id}">Remove</button></td></tr>`;
+    }).join("")||`<tr><td colspan="4" class="hint">No accounts yet — add one above.</td></tr>`;
+    const addForm=`<div class="card"><h3>Add an account</h3><div class="sub">Held by an individual or a company — this drives the per-person net worth</div>
+      <div style="margin:8px 0 14px;padding:10px 12px;border:1px dashed var(--line);border-radius:9px;background:#faf9f6">
+        <label class="lbl" style="margin-bottom:6px">Paste account info (e.g. Bank / Holder / Account), then click Fill</label>
+        <textarea id="naPaste" rows="3" placeholder="Bank&#9;HSBC&#10;Holder&#9;MISS IP WAI YEE AMY&#10;Account&#9;008-638132-833" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-size:13px;resize:vertical"></textarea>
+        <button class="btn sm" id="naFill" style="margin-top:8px">⤓ Fill from paste</button>
       </div>
       <div class="row" style="margin-bottom:10px">
-        <div class="field"><label class="lbl">Bank name</label><input id="naBank" placeholder="OCBC"/></div>
-        <div class="field"><label class="lbl">Account number</label><input id="naNumber" placeholder="123-456789-001"/></div>
-        <div class="field"><label class="lbl">Balance</label><input id="naBal" type="number" placeholder="0"/></div>
+        <div class="field"><label class="lbl">Bank name</label><input id="naBank" placeholder="HSBC"/></div>
+        <div class="field"><label class="lbl">Account number</label><input id="naNumber" placeholder="008-638132-833"/></div>
+        <div class="field"><label class="lbl">Type</label><select id="naType"><option value="individual">Individual</option><option value="company">Company</option></select></div>
       </div>
       <div id="ownerArea"></div>
       <button class="btn primary" id="addAcct" style="margin-top:12px">Add account</button>
       <div class="warn" id="acctWarn" style="display:none"></div>
-      <template id="tplIndividual"><label class="lbl">Account holder (individual)</label><select id="naPerson">${single||'<option value="">— add an individual first —</option>'}</select></template>
+      <template id="tplIndividual"><label class="lbl">Account holder(s) — comma-separate two or more for a joint account</label><input id="naPerson" placeholder="e.g. Amy Ip, Ben Ip" list="naPeopleList"/><datalist id="naPeopleList">${M.people.map(p=>`<option value="${esc(p.name)}">`).join("")}</datalist></template>
       <template id="tplCompany"><label class="lbl">Owned by company</label><select id="naCompany">${comps||'<option value="">— add a company first —</option>'}</select></template>
-    </div>
-    <div class="card"><h3>Accounts</h3><div class="sub">${M.accounts.length} ${M.accounts.length===1?"account":"accounts"}</div>
-      <table><thead><tr><th>Account</th><th>Type</th><th>Held by</th><th class="num">Balance</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    </div>`;
+    const toggle=`<div style="margin-bottom:16px"><button class="btn ${acctAddOpen?'':'primary'}" id="toggleAddAcct">${acctAddOpen?"✕ Close":"+ Add an account"}</button></div>`;
+    return toggle + (acctAddOpen?addForm:"") + `<div class="card"><h3>Accounts</h3><div class="sub">${M.accounts.length} ${M.accounts.length===1?"account":"accounts"} — click an account to open it</div>
+      <table><thead><tr><th>Account</th><th>Type</th><th>Held by</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 };
 
+function parseAcctPaste(text){
+  const out={};
+  (text||"").split(/\r?\n/).forEach(line=>{
+    let m=line.match(/^\s*([A-Za-z][A-Za-z .\/]*?)\s*[\t:]+\s*(.+?)\s*$/);
+    if(!m) m=line.match(/^\s*([A-Za-z][A-Za-z .\/]*?)\s{2,}(.+?)\s*$/);
+    if(!m) return;
+    const k=m[1].toLowerCase().trim(), v=m[2].trim();
+    if(/bank|institution/.test(k)) out.bank=v;
+    else if(/account\s*name|statement|tier|product/.test(k)) out.accname=v;
+    else if(/holder|account holder|^name$|name of/.test(k)) out.holder=v;
+    else if(/account|^number$|^no$|^a\/c/.test(k)) out.number=v;
+    else if(/balance/.test(k)) out.balance=v;
+  });
+  return out;
+}
+
 /* ---------- per-view event binding ---------- */
 const BIND={
+  async dashboard(){
+    const el=$("dashBody"); if(!el) return;
+    let db; try{ db=await loadStatementsDB(); }catch(e){ db={statements:[],balances:[],transactions:[]}; }
+    const valOf=a=>{
+      const num=(a.number||"").replace(/\D/g,""); if(!num) return 0;
+      const mine=(db.statements||[]).filter(s=>((s.meta&&s.meta.account)||"").replace(/\D/g,"")===num);
+      if(!mine.length) return 0;
+      const latest=mine.slice().sort((x,y)=>(x.date||"").localeCompare(y.date||"")).pop();
+      let v=0;
+      (db.balances||[]).filter(b=>b.bank===latest.bank&&b.statement_date===latest.date).forEach(b=>{
+        const h=(b.hkd_equivalent!=null?+b.hkd_equivalent:+b.balance)||0;
+        if(b.section==="deposit"||b.section==="investment") v+=h;
+        else if(b.section==="credit_card"||b.section==="credit_facility") v-=h;
+      });
+      return v;
+    };
+    const val={}; M.accounts.forEach(a=>val[a.id]=valOf(a));
+    const total=M.accounts.reduce((s,a)=>s+(val[a.id]||0),0);
+    let companyHeld=0,personalHeld=0; M.accounts.forEach(a=>{ if(a.type==="company") companyHeld+=val[a.id]||0; else personalHeld+=val[a.id]||0; });
+    const pnw=pid=>{let t=0;M.accounts.forEach(a=>{const o=ownersOf(a).find(x=>x.personId===pid);if(o)t+=o.pct/100*(val[a.id]||0);});return t;};
+    const ppl=M.people.map(p=>({p,nw:pnw(p.id)})).sort((a,b)=>b.nw-a.nw);
+    const cards=`<div class="kpis"><div class="kpi"><div class="l">Total assets</div><div class="v">${fmt(total)}</div></div>
+      <div class="kpi"><div class="l">Personal-held</div><div class="v">${fmt(personalHeld)}</div></div>
+      <div class="kpi"><div class="l">Company-held</div><div class="v">${fmt(companyHeld)}</div></div></div>`;
+    const rows=ppl.map(x=>`<tr><td style="font-weight:600">${esc(x.p.name)}</td><td class="num pos" style="font-weight:600">${fmt(x.nw)}</td><td class="num">${total?(x.nw/total*100).toFixed(1):0}%</td></tr>`).join("")||`<tr><td colspan="3" class="hint">Add people and accounts to see net worth.</td></tr>`;
+    const arows=M.accounts.map(a=>`<tr><td style="font-weight:600">${esc(a.institution||"—")}</td><td class="sub" style="margin:0">${esc(a.number||"")}</td><td><span class="pill ${a.type}">${a.type}</span></td><td class="num">${fmt(val[a.id]||0)}</td></tr>`).join("")||`<tr><td colspan="4" class="hint">No accounts yet.</td></tr>`;
+    el.innerHTML=cards+`<div class="card"><h3>Net worth by person</h3><div class="sub">Each account valued from its latest statement (cash + investments − loans), attributed by ownership %</div>
+      <table><thead><tr><th>Person</th><th class="num">Net worth</th><th class="num">Share of total</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="card"><h3>Accounts — latest statement value</h3><table><thead><tr><th>Bank</th><th>Account</th><th>Type</th><th class="num">Value (HKD)</th></tr></thead><tbody>${arows}</tbody></table></div>`;
+  },
   individual(){
     $("addPerson").onclick=async()=>{const n=$("npName").value.trim();if(!n)return;M.people.push({id:uid(),name:n});await save();render();};
     document.querySelectorAll("[data-del-person]").forEach(b=>b.onclick=async()=>{
-      const id=b.dataset.delPerson;M.people=M.people.filter(p=>p.id!==id);
+      const id=b.dataset.delPerson;
+      const held=M.accounts.filter(a=>(a.holders||[]).some(h=>h.personId===id));
+      if(held.length){ alert("Can't remove this individual — they hold "+held.length+" bank account"+(held.length>1?"s":"")+" ("+held.map(a=>a.institution||a.number||"account").join(", ")+"). Remove or reassign "+(held.length>1?"those accounts":"that account")+" first under Bank accounts."); return; }
+      M.people=M.people.filter(p=>p.id!==id);
       M.companies.forEach(c=>c.shareholders=(c.shareholders||[]).filter(s=>s.personId!==id));
-      M.accounts.forEach(a=>{if(a.holders)a.holders=a.holders.filter(h=>h.personId!==id);});
       await save();render();});
     document.querySelectorAll("[data-pname]").forEach(inp=>inp.onchange=async()=>{const p=person(inp.dataset.pname);if(p){p.name=inp.value.trim()||p.name;await save();render();}});
   },
+  async hsbcStmt(){
+    const el=$("hsbcStmtBody"); if(!el) return;
+    let db;
+    try{ db=await loadStatementsDB(); }
+    catch(e){ el.innerHTML='<div class="card"><div class="sub">Couldn\'t load from Supabase: '+esc(e.message||e)+'.</div></div>'; return; }
+    if(!db.statements||!db.statements.length){ el.innerHTML='<div class="card"><div class="sub">No statements in Supabase yet — push them via <b>Admin → ☁ Cloud sync</b>.</div></div>'; return; }
+    const dates=db.statements.map(s=>s.date).filter(Boolean).sort();
+    let i=dates.length-1;
+    const draw=()=>{
+      el.innerHTML=hsbcStatementHTML(db,dates[i]);
+      const p=$("stmtPrev"), n=$("stmtNext");
+      if(p) p.onclick=()=>{ i=(i-1+dates.length)%dates.length; draw(); };
+      if(n) n.onclick=()=>{ i=(i+1)%dates.length; draw(); };
+    };
+    draw();
+  },
+  settings(){
+    const cp=$("cpBtn"); if(!cp) return;
+    cp.onclick=async()=>{
+      const msg=$("cpMsg");
+      const newPw=$("cpNew").value, conPw=$("cpCon").value;
+      if(!newPw||!conPw){msg.style.color="#b91c1c";msg.textContent="Please fill in all fields.";return;}
+      if(newPw!==conPw){msg.style.color="#b91c1c";msg.textContent="New passwords do not match.";return;}
+      if(newPw.length<8){msg.style.color="#b91c1c";msg.textContent="New password must be at least 8 characters.";return;}
+      cp.disabled=true; msg.style.color="var(--muted)"; msg.textContent="Updating…";
+      try{
+        const{error}=await sb.auth.updateUser({password:newPw});
+        if(error){msg.style.color="#b91c1c";msg.textContent="✗ "+error.message;}
+        else{msg.style.color="#16a34a";msg.textContent="✓ Password changed.";$("cpNew").value="";$("cpCon").value="";}
+      }catch(e){msg.style.color="#b91c1c";msg.textContent="✗ "+e.message;}
+      cp.disabled=false;
+    };
+  },
   company(){ if(openCompany)bindCompanyDetail();else bindCompanyList(); },
   accounts(){
+    if(openAccount) return bindAccountDetail();
+    const tg=$("toggleAddAcct"); if(tg) tg.onclick=()=>{acctAddOpen=!acctAddOpen;render();};
+    if(acctAddOpen){
     const renderOwner=()=>{const t=$("naType").value;$("ownerArea").innerHTML=$("tpl"+t.charAt(0).toUpperCase()+t.slice(1)).innerHTML;};
     renderOwner();$("naType").onchange=renderOwner;
+    $("naFill").onclick=()=>{
+      const p=parseAcctPaste($("naPaste").value);
+      if(p.bank) $("naBank").value=p.bank;
+      if(p.number) $("naNumber").value=p.number;
+      $("naType").value="individual"; renderOwner();
+      if(p.holder && $("naPerson")) $("naPerson").value=p.holder;
+    };
     $("addAcct").onclick=async()=>{
       const w=$("acctWarn");w.style.display="none";
-      const name=$("naName").value.trim();if(!name){w.textContent="Enter an account name.";w.style.display="block";return;}
-      const type=$("naType").value,bal=+$("naBal").value||0;
-      const acct={id:uid(),name,institution:$("naBank").value.trim(),number:$("naNumber").value.trim(),balance:bal,type,documents:[]};
-      if(type==="individual"){const pid=$("naPerson")&&$("naPerson").value;if(!pid){w.textContent="Add an individual first (Entity → Individual).";w.style.display="block";return;}acct.holders=[{personId:pid,pct:100}];}
-      else{const cid=$("naCompany")&&$("naCompany").value;if(!cid){w.textContent="Add a company first.";w.style.display="block";return;}acct.companyId=cid;}
-      M.accounts.push(acct);await save();render();
+      const type=$("naType").value, bank=$("naBank").value.trim(), number=$("naNumber").value.trim();
+      if(!bank && !number){w.textContent="Enter a bank name or account number.";w.style.display="block";return;}
+      const acct={id:uid(),name:bank||"Account",institution:bank,number,balance:0,type,documents:[]};
+      if(type==="individual"){
+        const names=(($("naPerson")&&$("naPerson").value)||"").split(",").map(s=>s.trim()).filter(Boolean);
+        if(!names.length){w.textContent="Enter at least one account holder.";w.style.display="block";return;}
+        const pct=100/names.length;
+        acct.holders=names.map(nm=>{let p=M.people.find(x=>x.name.toLowerCase()===nm.toLowerCase());if(!p){p={id:uid(),name:nm};M.people.push(p);}return {personId:p.id,pct};});
+      } else {const cid=$("naCompany")&&$("naCompany").value;if(!cid){w.textContent="Add a company first.";w.style.display="block";return;}acct.companyId=cid;}
+      M.accounts.push(acct);acctAddOpen=false;await save();render();
     };
-    document.querySelectorAll("[data-bal]").forEach(inp=>inp.onchange=async()=>{const a=M.accounts.find(x=>x.id===inp.dataset.bal);if(a){a.balance=+inp.value||0;await save();render();}});
-    document.querySelectorAll("[data-del-acct]").forEach(b=>b.onclick=async()=>{M.accounts=M.accounts.filter(a=>a.id!==b.dataset.delAcct);await save();render();});
+    }
+    document.querySelectorAll("[data-openacct]").forEach(el=>el.onclick=()=>{openAccount=el.dataset.openacct;render();});
+    document.querySelectorAll("[data-del-acct]").forEach(b=>b.onclick=async()=>{if(!confirm("Remove this account?"))return;M.accounts=M.accounts.filter(a=>a.id!==b.dataset.delAcct);await save();render();});
   }
 };
+function bindAccountDetail(){
+  const a=M.accounts.find(x=>x.id===openAccount); if(!a){openAccount=null;return render();}
+  $("backAcct").onclick=()=>{openAccount=null;acctEdit=false;render();};
+  document.querySelectorAll("[data-acctab]").forEach(b=>b.onclick=()=>{openAccount=b.dataset.acctab;acctEdit=false;render();});
+  if(acctEdit && $("eaType")){
+    const holderNames=(a.holders||[]).map(h=>person(h.personId)?person(h.personId).name:"").filter(Boolean).join(", ");
+    const renderEaOwner=()=>{
+      $("eaOwnerArea").innerHTML = $("eaType").value==="company"
+        ? `<label class="lbl">Owned by company</label><select id="eaCompany">${M.companies.map(c=>`<option value="${c.id}" ${a.companyId===c.id?"selected":""}>${esc(c.name)}</option>`).join("")||'<option value="">— add a company first (Entity → Company) —</option>'}</select>`
+        : `<label class="lbl">Account holder(s) — comma-separate two or more for a joint account</label><input id="eaHolders" value="${esc(holderNames)}" placeholder="e.g. Amy Ip, Ben Ip" list="eaPeople"/><datalist id="eaPeople">${M.people.map(p=>`<option value="${esc(p.name)}">`).join("")}</datalist>`;
+    };
+    renderEaOwner(); $("eaType").onchange=renderEaOwner;
+  }
+  const eb=$("editAcct");
+  if(eb) eb.onclick=async()=>{
+    if(acctEdit){
+      a.institution=$("eaBank").value.trim(); a.name=a.institution||a.name||"Account"; a.number=$("eaNumber").value.trim();
+      const type=$("eaType")?$("eaType").value:a.type;
+      if(type==="company"){
+        const cid=$("eaCompany")&&$("eaCompany").value;
+        if(cid){ a.type="company"; a.companyId=cid; delete a.holders; }
+      } else {
+        const names=(($("eaHolders")&&$("eaHolders").value)||"").split(",").map(s=>s.trim()).filter(Boolean);
+        a.type="individual"; delete a.companyId;
+        if(names.length){ const pct=100/names.length; a.holders=names.map(nm=>{let p=M.people.find(x=>(x.name||"").toLowerCase()===nm.toLowerCase());if(!p){p={id:uid(),name:nm};M.people.push(p);}return {personId:p.id,pct};}); }
+      }
+      acctEdit=false; await save(); render(); return;
+    }
+    acctEdit=true; render();
+  };
+  document.querySelectorAll("[data-del-acct]").forEach(b=>b.onclick=async()=>{if(!confirm("Delete this account?"))return;M.accounts=M.accounts.filter(x=>x.id!==b.dataset.delAcct);openAccount=null;acctEdit=false;await save();render();});
+  bindDocs();
+  if(!acctEdit) loadAcctReport(a);
+}
 
 /* ---------- boot ---------- */
 $("submit").onclick=doAuth;$("pass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth();});
 $("logout").onclick=logout;
+$("toChangePw").onclick=()=>{$("cpPanel").classList.toggle("hidden");};
+$("toForgotPw").onclick=()=>{$("fpPanel").classList.toggle("hidden");$("cpPanel").classList.add("hidden");};
+$("fpBtn").onclick=async()=>{
+  const msg=$("fpMsg");
+  const email=$("fpEmail").value.trim().toLowerCase();
+  if(!email){msg.style.color="#b91c1c";msg.textContent="Please enter your email.";return;}
+  $("fpBtn").disabled=true;msg.style.color="var(--muted)";msg.textContent="Sending…";
+  try{
+    const{error}=await sb.auth.resetPasswordForEmail(email);
+    if(error){msg.style.color="#b91c1c";msg.textContent="✗ "+error.message;}
+    else{msg.style.color="#16a34a";msg.textContent="✓ Reset link sent — check your email.";}
+  }catch(e){msg.style.color="#b91c1c";msg.textContent="✗ "+e.message;}
+  $("fpBtn").disabled=false;
+};
+$("cpBtnL").onclick=async()=>{
+  const msg=$("cpMsgL");
+  const newPw=$("cpNewL").value,conPw=$("cpConL").value;
+  if(!newPw||!conPw){msg.style.color="#b91c1c";msg.textContent="Please fill in all fields.";return;}
+  if(newPw!==conPw){msg.style.color="#b91c1c";msg.textContent="New passwords do not match.";return;}
+  if(newPw.length<8){msg.style.color="#b91c1c";msg.textContent="New password must be at least 8 characters.";return;}
+  $("cpBtnL").disabled=true;msg.style.color="var(--muted)";msg.textContent="Updating…";
+  try{
+    const{error}=await sb.auth.updateUser({password:newPw});
+    if(error){msg.style.color="#b91c1c";msg.textContent="✗ "+error.message;}
+    else{msg.style.color="#16a34a";msg.textContent="✓ Password changed.";$("cpNewL").value="";$("cpConL").value="";}
+  }catch(e){msg.style.color="#b91c1c";msg.textContent="✗ "+e.message;}
+  $("cpBtnL").disabled=false;
+};
 $("cf_cancel").onclick=closeCoForm;
 $("cf_save").onclick=saveCoForm;
 $("coForm").addEventListener("click",e=>{if(e.target.id==="coForm")closeCoForm();});
