@@ -1452,9 +1452,9 @@ $("fpBtn").onclick=async()=>{
   if(!email){msg.style.color="#b91c1c";msg.textContent="Please enter your email.";return;}
   $("fpBtn").disabled=true;msg.style.color="var(--muted)";msg.textContent="Sending…";
   try{
-    const{error}=await sb.auth.resetPasswordForEmail(email);
+    const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
     if(error){msg.style.color="#b91c1c";msg.textContent="✗ "+error.message;}
-    else{msg.style.color="#16a34a";msg.textContent="✓ Reset link sent — check your email.";}
+    else{msg.style.color="#16a34a";msg.textContent="✓ Reset link sent — check your email (and spam folder).";}
   }catch(e){msg.style.color="#b91c1c";msg.textContent="✗ "+e.message;}
   $("fpBtn").disabled=false;
 };
@@ -1476,6 +1476,17 @@ $("cf_cancel").onclick=closeCoForm;
 $("cf_save").onclick=saveCoForm;
 $("coForm").addEventListener("click",e=>{if(e.target.id==="coForm")closeCoForm();});
 $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b){view=b.dataset.v;openCompany=null;coEdit=false;brEditMode=false;pendingCap=null;render();}});
+// When the user returns from the password-reset email, Supabase fires PASSWORD_RECOVERY.
+// Show the "set new password" panel so they can complete the reset.
+sb.auth.onAuthStateChange((event)=>{
+  if(event==="PASSWORD_RECOVERY"){
+    $("authScreen").classList.remove("hidden");
+    $("appRoot").classList.add("hidden");
+    $("fpPanel").classList.add("hidden");
+    $("cpPanel").classList.remove("hidden");
+    const m=$("cpMsgL"); if(m){m.style.color="var(--accent)";m.textContent="Reset link verified — enter your new password below.";}
+  }
+});
 setMode("login");wireSwitch();
 </script>
 </body>
